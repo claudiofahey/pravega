@@ -62,7 +62,7 @@ For more samples, see [SampleUsage.java](SampleUsage.java).
 - Reader concurrency: A single reader can have multiple events "open" and read from them concurrently from
   different threads.
 
-- Skip ahead: A reader may read just a few bytes of a very large event and decide to skip reading the entire event
+- Skip ahead: A reader may read just a few bytes of a very large event and decide to skip reading the rest of the event
   and move to the next event. This should be implemented efficiently.
 
 - Random read: A reader may read a single event based on an `EventPointer`.
@@ -71,6 +71,8 @@ For more samples, see [SampleUsage.java](SampleUsage.java).
 
 - Streams written using the file API should be readable using the standard event API.
   Events that exceed the 1 MB event API limit should be handled as non-fatal conditions.
+  If using method 2 below, it would be reasonable to return the 1 MB events plus
+  the EOF marker event.
 
 ## Implementation Ideas
 
