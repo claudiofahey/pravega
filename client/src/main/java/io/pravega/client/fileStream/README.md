@@ -116,6 +116,9 @@ known until the `FileOutputStream.close` is called.
      reads through the EOF marker must come from the same segment. We don't want the reader
      to change to another segment in the middle of a `FileOutputStream`. This is a client-side change.
 
+Note: The ideas above will likely break the ability to use the file API and standard stream API in the same stream.
+More thought needs to go into this.
+
 ### getEventPointer from the writer
 
 A nice feature would be to allow a writer to obtain the EventPointer for an event that has just been written and committed.
