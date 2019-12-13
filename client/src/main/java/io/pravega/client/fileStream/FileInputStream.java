@@ -18,7 +18,8 @@ import java.util.concurrent.CompletableFuture;
 /**
  * This class is based on ByteStreamReader.
  *
- * Allows for reading raw bytes from a stream. This class is designed such that it can be used with
+ * Allows for reading raw bytes from an event written using FileStreamWriter.
+ * This class is designed such that it can be used with
  * or without blocking. To avoid blocking use the {@link #onDataAvailable()} method to make sure to
  * only call {@link #read(byte[])} when there is data {@link #available()}.
  *
@@ -29,14 +30,14 @@ import java.util.concurrent.CompletableFuture;
 public abstract class FileInputStream extends InputStream implements AsynchronousChannel, AutoCloseable {
 
     /**
-     * Returns the current byte offset in the file. This call does not block.
-     * @return the current byte offset in the file.
+     * Returns the current byte offset in the event. This call does not block.
+     * @return the current byte offset in the event.
      */
     public abstract long getOffset();
 
     /**
-     * Seeks to the provided offset (It can be anywhere in the file). Future read calls will read
-     * from this offset. Future reads will proceed from this offset.
+     * Seeks to the provided offset (It can be anywhere in the event). Future read calls will read
+     * from this offset.
      *
      * @param offset The offset to seek to.
      */
@@ -95,7 +96,7 @@ public abstract class FileInputStream extends InputStream implements Asynchronou
     /**
      * Returns a future that will be completed when there is data available to be read. The Integer
      * in the result will be the number of bytes {@link #available()} or -1 if the reader has
-     * reached the end of a sealed segment.
+     * reached the end of the event.
      * 
      * @return A the number of bytes {@link #available()}
      */

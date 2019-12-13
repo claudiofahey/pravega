@@ -19,13 +19,21 @@ public class SampleUsage {
         byte[] data1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         byte[] data2 = new byte[] { 10, 11, 12 };
 
+        //
         // Write byte arrays and commit.
+        //
         FileOutputStream os1 = writer.writeEvent("routingKey1");
+        // writeEvent does not perform any Pravega RPCs.
         os1.write(data1);
+        // No data is available to readers yet.
         os1.write(data2);
+        // No data is available to readers yet.
         os1.close();
+        // Now the entire event is available to readers.
+
         // Get the EventPointer so that we can read this specific event later.
-        EventPointer ptr1 = os1.getEventPointer();
+        final boolean wait = true;
+        EventPointer ptr1 = os1.getEventPointer(wait);
         // TODO: Serialize EventPointer and persist it.
 
         // Copy large file from file system to the Pravega stream.
