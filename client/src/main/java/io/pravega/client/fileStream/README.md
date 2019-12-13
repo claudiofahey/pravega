@@ -26,11 +26,13 @@ while (true) {
     FileOutputStream os1 = writer.writeEvent("routingKey1");
     // writeEvent does not perform any Pravega RPCs.
     os1.write(data1);
-    // No data is available to readers yet. It is either buffered in the client or written to an open Pravega transaction.
+    // No data is available to readers yet.
+    // It is either buffered in the client or written to an open Pravega transaction.
     os1.write(data2);
     // Still no data is available to readers.
     os1.close();
-    // Buffers have been flushed and the open transaction has been committed. Now the entire event is available to readers.
+    // Buffers have been flushed and the open transaction has been committed.
+    // Now the entire event is available to readers.
 }
 ```
 
