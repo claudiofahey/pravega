@@ -21,7 +21,7 @@ However, a new event can be started by calling `EventStreamWriter.writeEvent`.
 
 This shows how to use the file writer API.
 
-```
+```java
 while (true) {
     FileOutputStream os1 = writer.writeEvent("routingKey1");
     // writeEvent does not perform any Pravega RPCs.
@@ -36,7 +36,7 @@ while (true) {
 
 This shows how to use the file reader API.
 
-```
+```java
 while (true) {
     EventRead<FileInputStream> eventRead = reader.readNextEvent(timeout);
     FileInputStream inputStream = eventRead.getEvent();
