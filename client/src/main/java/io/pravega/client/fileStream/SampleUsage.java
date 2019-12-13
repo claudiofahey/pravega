@@ -47,6 +47,10 @@ public class SampleUsage {
         os3.close();    // this commits file 3 to the Pravega stream
     }
 
+    /**
+     * This demonstrates reading all of the files written by SampleWriter.
+     * It will read files 1, 2, 4, 3.
+     */
     void SampleReader() throws Exception {
         final long timeout = 1000;
         FileStreamReader reader = fileStreamClientFactory.createReader(readerId, readerGroup, config);
@@ -64,7 +68,7 @@ public class SampleUsage {
     }
 
     /**
-     * This demonstrates the ability to write events concurrently form multiple threads.
+     * This demonstrates the ability to write events concurrently from multiple threads.
      */
     void SampleConcurrentWriter() throws Exception {
         final FileStreamWriter writer = fileStreamClientFactory.createWriter(streamName, config);
