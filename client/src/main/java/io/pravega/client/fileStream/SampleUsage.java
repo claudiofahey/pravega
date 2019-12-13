@@ -33,6 +33,7 @@ public class SampleUsage {
         InputStream is2 = new java.io.FileInputStream("/tmp/file2");
         FileOutputStream os2 = writer.writeEvent("routingKey2");
         IOUtils.copyLarge(is2, os2);
+        is2.close();
         os2.close();
 
         // Write files 3 and 4. Both files will be open at the same time.

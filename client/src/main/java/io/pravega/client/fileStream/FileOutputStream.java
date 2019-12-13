@@ -58,9 +58,13 @@ public abstract class FileOutputStream extends OutputStream {
      * This can only be called after close().
      * This may require an RPC to the server.
      *
+     * @param wait If true, this method will block until subsequent calls to FileStreamReader#fetchEvent
+     *             are guaranteed to succeed.
+     *             This is important to have read-after-write consistency.
+     *             If this guarantee is always provided, this parameter can be dropped.
      * @return Pointer to an event.
      */
-    EventPointer getEventPointer() {
+    EventPointer getEventPointer(boolean wait) {
         throw new NotImplementedException("");
     }
 }
