@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 
@@ -30,6 +31,10 @@ public class SampleUsage {
         // No data is available to readers yet.
         os1.close();
         // Now the entire event is available to readers.
+
+        // We can also using the standard event API for events that fit in client memory.
+        // Events can be of unlimited size.
+        CompletableFuture<Void> future1 = writer.writeEvent("routingKey1", ByteBuffer.wrap(data1));
 
         // Copy large file from file system to the Pravega stream.
         // The size is unlimited (more than 2 GB).

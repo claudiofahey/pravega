@@ -1,11 +1,11 @@
 
 # Pravega File API (Draft Proposal)
 
-The Pravega File API is very similar to the event API. It provides new methods to allow reading or writing
-of events containing arbitrary byte sequences using `java.io.InputStream` or `java.io.OutputStream` interfaces.
-I called it the "file stream" API because I didn't want to call it the "stream stream" API.
+The Pravega File API is very similar to the event API.
+`FileStreamWriter` extends `EventStreamWriter<ByteBuffer>` and has additional methods to write event content as a `java.io.OutputStream`.
+`FileStreamReader` extends `EventStreamReader<ByteBuffer>` and has additional methods to read event content as a `java.io.InputStream`.
 
-Assuming this can be implemented, it has all the functionality of the non-transactional event API and byte stream API combined.
+It has all the functionality of the non-transactional event API and byte stream API combined.
 It supports routing keys, multiple segments, reader groups, events of unlimited size, and does not require the user to implement framing.
 
 The intent is to have an unbounded sequence of events.
@@ -68,12 +68,20 @@ For more samples, see [SampleUsage.java](SampleUsage.java).
 
 - Random read: A reader may read a single event based on an `EventPointer`.
 
+- A `FileStreamWriter` can choose to mix `writeEvent` and `beginWriteEvent` in any way.
+
+- A `FileStreamReader` can choose to mix `readNextEvent` and `readNextEventAsStream` in any way.
+
 - Streams written using the standard event API should be readable using the file API.
 
-- Streams written using the file API should be readable using the standard event API.
-  Events that exceed the 1 MB event API limit should be handled as non-fatal conditions.
-  If using method 2 below, it would be reasonable to return the 1 MB events plus
-  the EOF marker event.
+- Streams written using the file API should be readable using the standard event API (EventStreamReader).
+  Events may exceed 1 MB and any necessary reassembly should be transparent to the caller.
+  Readers should be able to set a maximum accepted event size (with 1 MB default) to avoid out-of-memory errors on the client.
+  If EventStreamReader.readNextEvent encounters an event whose size exceeds this limit, it should
+  throw an EventTooLargeException. Subsequent calls should skip the large event and return the following event.
+
+- It is expected that the enhancements made to Pravega to implement the file API should be directly applicable to the standard event API,
+  allowing the standard event API to accept events of unlimited size.
 
 ## Implementation Ideas
 
