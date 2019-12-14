@@ -9,26 +9,42 @@
  */
 package io.pravega.client.fileStream;
 
+import io.pravega.client.stream.EventPointer;
+import io.pravega.client.stream.EventStreamWriter;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+
 /**
- * A writer that can write files (an unlimited sequence of bytes) to a stream.
- * Based on EventStreamWriter.
+ * An {@link EventStreamWriter} that can write bytes sequences of unlimited size to a Pravega stream.
  */
-public interface FileStreamWriter extends AutoCloseable {
+public interface FileStreamWriter extends EventStreamWriter<ByteBuffer> {
     /**
-     * Initiate writing a file to the stream.
+     * Initiate writing an event to the stream.
+     * This will return a {@link FileOutputStream} that can be used to write the event contents.
+     * The event will not be made available to readers until {@link FileOutputStream#close} is called.
      * This method performs no I/O to Pravega.
      *
      * @param routingKey A free form string that is used to route messages to readers. Two events written with
      *        the same routingKey are guaranteed to be read in order. Two events with different routing keys
      *        may be read in parallel. 
-     * @return A FileOutputStream that can be used to write the file contents.
+     * @return A FileOutputStream that can be used to write the event contents.
      */
-    FileOutputStream writeEvent(String routingKey);
+    FileOutputStream beginWriteEvent(String routingKey);
+    FileOutputStream beginWriteEvent();
 
-    FileOutputStream writeEvent();
+    /**
+     * Write a single event whose content will be the concatenation of one or more ByteBuffers.
+     */
+    CompletableFuture<Void> writeEvent(String routingKey, ByteBuffer... event);
+    CompletableFuture<Void> writeEvent(ByteBuffer... event);
 
-    void noteTime(long timestamp);
-
-    @Override
-    void close();
+    /**
+     * Write a single event whose content will be the concatenation of one or more ByteBuffer.
+     *
+     * @return a CompletableFuture that will receive the {@link EventPointer} that can be used
+     * to immediately read the event.
+     */
+    CompletableFuture<EventPointer> writeEventAndReturnPointer(String routingKey, ByteBuffer... event);
+    CompletableFuture<EventPointer> writeEventAndReturnPointer(ByteBuffer... event);
 }

@@ -1,8 +1,9 @@
 
 # Pravega File API (Draft Proposal)
 
-The Pravega File API is very similar to the event API but the generic event type is a `java.io.InputStream` or
-`java.io.OutputStream`. I called it the "file stream" API because I didn't want to call it the "stream stream" API.
+The Pravega File API is very similar to the event API. It provides new methods to allow reading or writing
+of events containing arbitrary byte sequences using `java.io.InputStream` or `java.io.OutputStream` interfaces.
+I called it the "file stream" API because I didn't want to call it the "stream stream" API.
 
 Assuming this can be implemented, it has all the functionality of the non-transactional event API and byte stream API combined.
 It supports routing keys, multiple segments, reader groups, events of unlimited size, and does not require the user to implement framing.
@@ -17,13 +18,13 @@ A key difference between the file API and the byte stream API is that no data wi
 the `FileOutputStream` that is associated with a single event.
 At that point, the event's content becomes fixed and it can be made available to readers, possibly by committing the transaction.
 Once the `FileOutputStream` has been closed, no more bytes can be written to that event.
-However, a new event can be started by calling `EventStreamWriter.writeEvent`.
+However, a new event can be started by calling `EventStreamWriter.beginWriteEvent`.
 
 This shows how to use the file writer API.
 
 ```java
 while (true) {
-    FileOutputStream os1 = writer.writeEvent("routingKey1");
+    FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
     // writeEvent does not perform any Pravega RPCs.
     os1.write(data1);
     // No data is available to readers yet.
@@ -40,7 +41,7 @@ This shows how to use the file reader API.
 
 ```java
 while (true) {
-    EventRead<FileInputStream> eventRead = reader.readNextEvent(timeout);
+    EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
     FileInputStream inputStream = eventRead.getEvent();
     if (inputStream != null) {
         // Copy event contents to a normal file.

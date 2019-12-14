@@ -22,8 +22,8 @@ public class SampleUsage {
         //
         // Write byte arrays and commit.
         //
-        FileOutputStream os1 = writer.writeEvent("routingKey1");
-        // writeEvent does not perform any Pravega RPCs.
+        FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
+        // beginWriteEvent does not perform any Pravega RPCs.
         os1.write(data1);
         // No data is available to readers yet.
         os1.write(data2);
@@ -31,23 +31,20 @@ public class SampleUsage {
         os1.close();
         // Now the entire event is available to readers.
 
-        // Get the EventPointer so that we can read this specific event later.
-        final boolean wait = true;
-        EventPointer ptr1 = os1.getEventPointer(wait);
-        // TODO: Serialize EventPointer and persist it.
-
         // Copy large file from file system to the Pravega stream.
         // The size is unlimited (more than 2 GB).
         InputStream is2 = new java.io.FileInputStream("/tmp/file2");
-        FileOutputStream os2 = writer.writeEvent("routingKey2");
+        FileOutputStream os2 = writer.beginWriteEvent("routingKey2");
         IOUtils.copyLarge(is2, os2);
         is2.close();
-        os2.close();
+        // Close the OutputStream and get the EventPointer so that we can read this specific event later.
+        EventPointer ptr1 = os2.closeAndReturnEventPointer();
+        // TODO: Serialize EventPointer and persist it.
 
         // Write files 3 and 4. Both files will be open at the same time.
         // They will be written as separate transactions and will NOT be interleaved.
-        FileOutputStream os3 = writer.writeEvent("routingKey3");
-        FileOutputStream os4 = writer.writeEvent("routingKey4");
+        FileOutputStream os3 = writer.beginWriteEvent("routingKey3");
+        FileOutputStream os4 = writer.beginWriteEvent("routingKey4");
         os3.write(data1);
         os4.write(data2);
         os3.write(data2);
@@ -64,7 +61,7 @@ public class SampleUsage {
         final long timeout = 1000;
         FileStreamReader reader = fileStreamClientFactory.createReader(readerId, readerGroup, config);
         for (int i = 0 ;; i++) {
-            EventRead<FileInputStream> eventRead = reader.readNextEvent(timeout);
+            EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
             FileInputStream inputStream = eventRead.getEvent();
             if (inputStream != null) {
                 // Copy event contents to a normal file.
@@ -86,7 +83,7 @@ public class SampleUsage {
         final ExecutorService executor = new ForkJoinPool();
         executor.submit(() -> {
             InputStream is = new java.io.FileInputStream("/tmp/file5");
-            FileOutputStream os = writer.writeEvent("routingKey5");
+            FileOutputStream os = writer.beginWriteEvent("routingKey5");
             final long bytesCopied = IOUtils.copyLarge(is, os);
             is.close();
             os.close();
@@ -94,7 +91,7 @@ public class SampleUsage {
         });
         executor.submit(() -> {
             InputStream is = new java.io.FileInputStream("/tmp/file6");
-            FileOutputStream os = writer.writeEvent("routingKey6");
+            FileOutputStream os = writer.beginWriteEvent("routingKey6");
             final long bytesCopied = IOUtils.copyLarge(is, os);
             is.close();
             os.close();
@@ -110,7 +107,7 @@ public class SampleUsage {
         final ExecutorService executor = new ForkJoinPool();
         FileStreamReader reader = fileStreamClientFactory.createReader(readerId, readerGroup, config);
         for (int i = 0 ;; i++) {
-            EventRead<FileInputStream> eventRead = reader.readNextEvent(timeout);
+            EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
             FileInputStream inputStream = eventRead.getEvent();
             if (inputStream != null) {
                 OutputStream outputStream = new java.io.FileOutputStream("/tmp/file" + i);
@@ -132,7 +129,7 @@ public class SampleUsage {
         FileStreamReader reader = fileStreamClientFactory.createReader(readerId, readerGroup, config);
         byte[] serializedEventPointer = null;   // TODO: read serialized EventPointer
         EventPointer ptr1 = EventPointer.fromBytes(ByteBuffer.wrap(serializedEventPointer));
-        FileInputStream inputStream = reader.fetchEvent(ptr1);
+        FileInputStream inputStream = reader.fetchEventAsStream(ptr1);
         OutputStream outputStream = new java.io.FileOutputStream("/tmp/file1");
         IOUtils.copyLarge(inputStream, outputStream);
         inputStream.close();

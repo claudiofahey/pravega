@@ -9,7 +9,26 @@
  */
 package io.pravega.client.fileStream;
 
+import io.pravega.client.segment.impl.NoSuchEventException;
+import io.pravega.client.stream.EventPointer;
+import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.TruncatedDataException;
 
-public interface FileStreamReader extends EventStreamReader<FileInputStream> {
+import java.nio.ByteBuffer;
+
+public interface FileStreamReader extends EventStreamReader<ByteBuffer> {
+
+    /**
+     * Similar to {@link #readNextEvent} but this returns a {@link FileInputStream}
+     * that can be used to read the content of the next event.
+     */
+    EventRead<FileInputStream> readNextEventAsStream(long timeout) throws ReinitializationRequiredException, TruncatedDataException;
+
+    /**
+     * Similar to {@link #fetchEvent} but this returns a {@link FileInputStream}
+     * that can be used to read the content of the next event.
+     */
+    FileInputStream fetchEventAsStream(EventPointer pointer) throws NoSuchEventException;
 }

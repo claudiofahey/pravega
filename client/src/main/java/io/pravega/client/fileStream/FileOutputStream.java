@@ -10,61 +10,45 @@
 package io.pravega.client.fileStream;
 
 import io.pravega.client.stream.EventPointer;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
- * Allows for writing raw bytes directly to a stream.
- * Unlike ByteStreamWriter, it allows multiple segments via routing keys and provides framing.
+ * Allows for writing the content of a single event using the {@link OutputStream} interface.
  */
 public abstract class FileOutputStream extends OutputStream {
 
     /**
      * Writes the provided data to buffers in preparation for appending to a Pravega stream.
-     * Data is not made available to any readers until close() is called.
+     * Data is not made available to any readers until {@link #close} is called.
      *
      * It is intended that this method not block, but it may in the event that the server becomes
      * disconnected for sufficiently long or is sufficiently slow that that backlog of data to be
      * written becomes a memory issue.
-     *
-     * Implementation note:
-     * Written bytes can be buffered on the client until they reach a threshold of 1 MB.
-     * At that point, a transaction will be started and the bytes will be written to Pravega
-     * (but not committed) by essentially calling EventStreamWriter.writeEvent multiple times.
-     * If this FileOutputStream is closed before reaching the threshold, a transaction does
-     * not need to be used.
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-    }
-
-    @Override
-    public void write(int var1) throws IOException {
-    }
+    public abstract void write(byte[] b, int off, int len) throws IOException;
 
     /**
+     * Similar to {@link #write(byte[], int, int)}
+     */
+    public abstract void write(ByteBuffer src) throws IOException;
+
+    /**
+     * Indicates that the content of the entire event has been written entirely.
+     * No more bytes may be written to this event after this call.
      * Writes the end-of-file (EOF) marker, flushes all buffers, writes any events to Pravega,
      * commits the transaction (if open), and closes this FileOutputStream.
      */
     @Override
-    public void close() throws IOException {
-    }
+    public abstract void close() throws IOException;
 
     /**
-     * Returns a pointer object for the event read. The event pointer enables a random read of the
-     * event at a future time.
-     * This can only be called after close().
-     * This may require an RPC to the server.
+     * Same as {@link #close} but also returns the {@link EventPointer}.
      *
-     * @param wait If true, this method will block until subsequent calls to FileStreamReader#fetchEvent
-     *             are guaranteed to succeed.
-     *             This is important to have read-after-write consistency.
-     *             If this guarantee is always provided, this parameter can be dropped.
-     * @return Pointer to an event.
+     * @return the {@link EventPointer} that can be used to immediately read the event.
      */
-    EventPointer getEventPointer(boolean wait) {
-        throw new NotImplementedException("");
-    }
+    public abstract EventPointer closeAndReturnEventPointer() throws IOException;
 }
