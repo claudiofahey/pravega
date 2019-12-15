@@ -156,8 +156,8 @@ fast-forward through an event consisting of many chunks.
 
 Consider the case in which there is a 1 GiB event written as 1024 1 MiB chunks.
 A reader can skip the entire event as follows.
-The reader reads first 32-bit length field.
+The reader reads the first 32-bit length field.
 It would then skip the number of bytes specified in the length field.
-If the partial flag was set, this process would be repeat for the following chunk.
+If the partial flag was set, this process would repeat for the following chunk.
 In total, there would be 1024 reads of 4 bytes each, totaling 4096 bytes, in order to skip 1 GiB of data.
 If the data were read from disks, this might require 1024 4 KiB reads totaling 4 MiB.
