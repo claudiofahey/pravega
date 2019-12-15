@@ -43,7 +43,7 @@ public class SampleUsage {
         IOUtils.copyLarge(is2, os2);
         is2.close();
         // Close the OutputStream and get the EventPointer so that we can read this specific event later.
-        EventPointer ptr1 = os2.closeAndReturnEventPointer();
+        EventPointer ptr1 = os2.closeAndReturnEventPointer().get();
         // TODO: Serialize EventPointer and persist it.
 
         // Write files 3 and 4. Both files will be open at the same time.

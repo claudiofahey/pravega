@@ -14,6 +14,7 @@ import io.pravega.client.stream.EventPointer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Allows for writing the content of a single event using the {@link OutputStream} interface.
@@ -46,9 +47,12 @@ public abstract class FileOutputStream extends OutputStream {
     public abstract void close() throws IOException;
 
     /**
-     * Same as {@link #close} but also returns the {@link EventPointer}.
+     * Same as {@link #close} but also returns a future for the {@link EventPointer}.
+     * This event returns after {@link #close} completes.
+     * The future will complete some time after when the {@link EventPointer} becomes available
+     * and can be used to read the event.
      *
-     * @return the {@link EventPointer} that can be used to immediately read the event.
+     * @return A future for the {@link EventPointer} that can be used to immediately read the event.
      */
-    public abstract EventPointer closeAndReturnEventPointer() throws IOException;
+    public abstract CompletableFuture<EventPointer> closeAndReturnEventPointer() throws IOException;
 }
