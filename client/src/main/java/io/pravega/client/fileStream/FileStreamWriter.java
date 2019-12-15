@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * An {@link EventStreamWriter} that can write bytes sequences of unlimited size to a Pravega stream.
+ * An {@link EventStreamWriter} that can write byte sequences of unlimited size to a Pravega stream.
  */
 public interface FileStreamWriter extends EventStreamWriter<ByteBuffer> {
     /**
@@ -25,9 +25,6 @@ public interface FileStreamWriter extends EventStreamWriter<ByteBuffer> {
      * The event will not be made available to readers until {@link FileOutputStream#close} is called.
      * This method performs no I/O to Pravega.
      *
-     * @param routingKey A free form string that is used to route messages to readers. Two events written with
-     *        the same routingKey are guaranteed to be read in order. Two events with different routing keys
-     *        may be read in parallel. 
      * @return A FileOutputStream that can be used to write the event contents.
      */
     FileOutputStream beginWriteEvent(String routingKey);
@@ -40,9 +37,9 @@ public interface FileStreamWriter extends EventStreamWriter<ByteBuffer> {
     CompletableFuture<Void> writeEvent(ByteBuffer... event);
 
     /**
-     * Write a single event whose content will be the concatenation of one or more ByteBuffer.
+     * Write a single event whose content will be the concatenation of one or more ByteBuffers.
      *
-     * @return a CompletableFuture that will receive the {@link EventPointer} that can be used
+     * @return A CompletableFuture that will receive the {@link EventPointer} that can be used
      * to immediately read the event.
      */
     CompletableFuture<EventPointer> writeEventAndReturnPointer(String routingKey, ByteBuffer... event);

@@ -85,50 +85,79 @@ For more samples, see [SampleUsage.java](SampleUsage.java).
 
 ## Implementation Ideas
 
-### FileOutputStream.write
+### Encoding of Large Events to Segments
 
-This method writes the provided data to buffers in preparation for appending to a Pravega stream.
-Data is not made available to any readers until close() is called.
+An event is currently written to a segment as the the length of the event (32-bit integer) followed by the serialized event.
+This will be changed so that events can be written in chunks.
+In general, chunks will be handled as events are today.
+However the high-order bit of the length prefix will be used to store a “partial” flag.
+It will be 1 if the event content continues to the following chunk.
+Otherwise, the current chunk is the last one for a particular event.
+This has the property that an event written using a prior version of Pravega will be decoded as an event with one chunk, providing backward compatibility.
+Forward compatibility will exist for events up to 1 MB.
 
-Written bytes can be buffered on the client until they reach a threshold of 1 MB.
-At that point, a transaction will be started and the bytes will be written to Pravega
-(but not committed) by effectively calling EventStreamWriter.writeEvent multiple times.
-If this FileOutputStream is closed before reaching the threshold, a transaction does
-not need to be used.
+Below shows a small event that consists of the hex bytes 12345678. It's encoding would remain unchanged.
+```
+0000 0004 1234 5678
+```
 
-### Serialization to Segments
+Below shows an event split into two chunks.
+The logical event consists of the hex bytes 123456789012.
+Note that there is no reason to chunk such as small event.
+This small event is chunked only to illustrate the encoding.
+```
+f000 0004 1234 5678
+0000 0002 9012
+```
 
-The simplest way to serialize events is to simply prefix the data with the length of the data.
-This is currently done with the standard event API.
+It is believed that this change can be implemented as a client-only change.
 
-This can also be done with the file API but the complication is that the event size will not be
-known until the `FileOutputStream.close` is called.
+### Writers
 
-1. One possibility is to change the segment store
-   commit logic so that it merges all standard (1 MB) events in the transaction.
-   The length can then be calculated and written before the event. It is unclear if this is feasible.
+The underlying implementation of *all* Pravega writers
+(`EventStreamWriter`, `IdempotentEventStreamWriter`, `TransactionalEventStreamWriter`, `FileStreamWriter`)
+will be changed to allow an event to consist of multiple chunks.
+If an event is 1 MB or less, there is no effective change.
+For a larger event, it would be split into chunks and written to the segment in a transaction.
+This ensures that all chunks for an event are contiguous.
 
-2. An alternative is as follows. It requires no server-side changes.
+When writing chunks, the writer does not need to know the total event size in advance.
+It only needs to know if additional bytes can be written in which case it would set the partial flag.
+It should be possible to write a final chunk with zero length (encoded as `0000 0000`).
 
-   - Writer: When `FileOutputStream.write` has 1 MB in its internal buffer,
-     it writes a standard event to an open transaction in Pravega. It repeats this as many times as necessary.
-     When `FileOutputStream.close` is called, it will write a special end-of-file marker event.
-     This can be something like an event with exactly one zero byte (with proper byte stuffing to handle
-     real events with exactly one zero byte).
-     After the EOF marker, it will commit the Pravega transaction.
+Transactions can be implicit (controlled by the implementation) or explicit (controlled by the user).
+If explicit, multiple large events can be written in the same transaction for improved throughput.
 
-   - Reader: `FileInputStream.read` will read bytes from standard events in the reader group and return them to the caller.
-     When it reaches the end of the standard event, it will read the following event *in that segment*.
-     If that event is the EOF marker, then it will return EOF to the caller.
-     Otherwise, it will continue returning bytes to the caller.
-     One critical difference between this behavior and the current event API behavior is that all
-     reads through the EOF marker must come from the same segment. We don't want the reader
-     to change to another segment in the middle of a `FileOutputStream`. This is a client-side change.
-
-Note: The ideas above will likely break the ability to use the file API and standard stream API in the same stream.
-More thought needs to go into this.
-
-### getEventPointer from the writer
-
-A nice feature would be to allow a writer to obtain the EventPointer for an event that has just been written and committed.
+A useful feature would be to allow a writer to obtain the EventPointer for an event that has just been written.
 If this can be done efficiently, it should be available.
+
+### Readers
+
+The underlying implementation of all Pravega readers
+(`EventStreamReader`, `FileStreamReader`)
+will be changed to reassemble events from chunks. 
+When a reader encounters a chunk with the partial flag set, it will know that it must continue reading the next chunk *in that segment*.
+One critical difference between this behavior and the current event API behavior is that all reads through the final chunk must come from the same segment.
+We don't want the reader to change to another segment in the middle of an event.
+
+The `EventStreamReader.readNext` method will build a single byte array in memory for the entire event.
+This will be convenient but could require lots of memory on the client.
+The `FileStreamReader.readNextEventAsStream` method can be used to avoid using excessive amount of memory.
+Regardless of the API, the event content is identical.
+
+### Skipping Events during Read
+
+When a reading a large event as a `java.io.InputStream`, it is sometimes useful to skip reading
+large number of bytes using `InputStream.skip`.
+Additionally, the caller of `FileStreamReader.readNextEventAsStream` may decide to
+get the next event before the current event has been read completely.
+In either case, the implementation should be able to efficiently provide a way to
+fast-forward through an event consisting of many chunks.
+
+Consider the case in which there is a 1 GiB event written as 1024 1 MiB chunks.
+A reader can skip the entire event as follows.
+The reader reads first 32-bit length field.
+It would then skip the number of bytes specified in the length field.
+If the partial flag was set, this process would be repeat for the following chunk.
+In total, there would be 1024 reads of 4 bytes each, totaling 4096 bytes, in order to skip 1 GiB of data.
+If the data were read from disks, this might require 1024 4 KiB reads totaling 4 MiB.
