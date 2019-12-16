@@ -25,7 +25,7 @@ public interface FileStreamWriter extends EventStreamWriter<ByteBuffer> {
      * The event will not be made available to readers until {@link FileOutputStream#close} is called.
      * This method performs no I/O to Pravega.
      *
-     * @return A FileOutputStream that can be used to write the event contents.
+     * @return A FileOutputStream that can be used to write the event content.
      */
     FileOutputStream beginWriteEvent(String routingKey);
     FileOutputStream beginWriteEvent();

@@ -20,19 +20,18 @@ public class SampleUsage {
         byte[] data1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         byte[] data2 = new byte[] { 10, 11, 12 };
 
-        //
         // Write byte arrays and commit.
-        //
         FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
         // beginWriteEvent does not perform any Pravega RPCs.
         os1.write(data1);
-        // No data is available to readers yet.
         os1.write(data2);
         // No data is available to readers yet.
         os1.close();
-        // Now the entire event is available to readers.
+        // The entire event may now be available to readers but this is not guaranteed.
+        writer.flush();
+        // Now the entire event is guaranteed to be available to readers.
 
-        // We can also using the standard event API for events that fit in client memory.
+        // We can also use the standard event API for events that fit in client memory.
         // Events can be of unlimited size.
         CompletableFuture<Void> future1 = writer.writeEvent("routingKey1", ByteBuffer.wrap(data1));
 
@@ -54,8 +53,10 @@ public class SampleUsage {
         os4.write(data2);
         os3.write(data2);
         os4.write(data1);
-        os4.close();    // this commits file 4 to the Pravega stream
-        os3.close();    // this commits file 3 to the Pravega stream
+        CompletableFuture<Void> future4 = os4.closeAndReturnReadabilityFuture();
+        CompletableFuture<Void> future3 = os3.closeAndReturnReadabilityFuture();
+        future4.get();
+        future3.get();
     }
 
     /**
@@ -105,7 +106,7 @@ public class SampleUsage {
     }
 
     /**
-     * This demonstrates the ability to read event contents concurrently from multiple threads.
+     * This demonstrates the ability to read the content of multiple events concurrently from multiple threads.
      */
     void SampleConcurrentReader() throws Exception {
         final long timeout = 1000;
@@ -139,6 +140,42 @@ public class SampleUsage {
         IOUtils.copyLarge(inputStream, outputStream);
         inputStream.close();
         outputStream.close();
+    }
+
+    void SampleTransactionalWriter() throws Exception {
+        final TransactionalFileStreamWriter writer = fileStreamClientFactory.createTransactionalEventWriter(writerId, streamName, config);
+
+        byte[] data1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        byte[] data2 = new byte[] { 10, 11, 12 };
+        byte[] data3 = new byte[] { 13, 14 };
+
+        FileTransaction tx1 = writer.beginTxn();
+        FileOutputStream os1 = tx1.beginWriteEvent("routingKey1");
+        os1.write(data1);
+        os1.write(data2);
+        os1.close();
+        // No data is available to readers yet.
+        tx1.commit();
+        // Now the entire event is guaranteed to be durably persisted. It may not be immediately available to readers.
+
+        // We can also use the standard event API for events that fit in client memory.
+        // Within a single transaction, writeEvent and beginWriteEvent can both be called any number of times.
+        FileTransaction tx2 = writer.beginTxn();
+        tx2.writeEvent("routingKey1", ByteBuffer.wrap(data1));
+        FileOutputStream os2 = tx2.beginWriteEvent("routingKey3");
+        os2.write(data3);
+        os2.close();
+        tx2.commit();
+
+        // We can also get EventPointers after committing the transaction.
+        FileTransaction tx3 = writer.beginTxn();
+        CompletableFuture<EventPointer> future3 = tx3.writeEventAndReturnPointer("routingKey1", ByteBuffer.wrap(data1));
+        FileOutputStream os3 = tx3.beginWriteEvent("routingKey3");
+        os3.write(data2);
+        CompletableFuture<EventPointer> future4 = os3.closeAndReturnEventPointer();
+        tx3.commit();
+        EventPointer ptr3 = future3.get();
+        EventPointer ptr4 = future4.get();
     }
 
 }

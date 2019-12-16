@@ -85,7 +85,11 @@ For more samples, see [SampleUsage.java](SampleUsage.java).
 
 ## Implementation Ideas
 
-### Encoding of Large Events to Segments
+### Method #1 - Chunking
+
+It is believed that this method can be implemented with changes only to the Pravega client.
+
+#### Encoding of Large Events to Segments
 
 An event is currently written to a segment as the the length of the event (32-bit integer) followed by the serialized event.
 This will be changed so that events can be written in chunks.
@@ -110,9 +114,8 @@ f000 0004 1234 5678
 0000 0002 9012
 ```
 
-It is believed that this change can be implemented as a client-only change.
 
-### Writers
+#### Writers
 
 The underlying implementation of *all* Pravega writers
 (`EventStreamWriter`, `IdempotentEventStreamWriter`, `TransactionalEventStreamWriter`, `FileStreamWriter`)
@@ -131,7 +134,7 @@ If explicit, multiple large events can be written in the same transaction for im
 A useful feature would be to allow a writer to obtain the EventPointer for an event that has just been written.
 If this can be done efficiently, it should be available.
 
-### Readers
+#### Readers
 
 The underlying implementation of all Pravega readers
 (`EventStreamReader`, `FileStreamReader`)
@@ -145,7 +148,7 @@ This will be convenient but could require lots of memory on the client.
 The `FileStreamReader.readNextEventAsStream` method can be used to avoid using excessive amount of memory.
 Regardless of the API, the event content is identical.
 
-### Skipping Events during Read
+#### Skipping Events during Read
 
 When a reading a large event as a `java.io.InputStream`, it is sometimes useful to skip reading
 large number of bytes using `InputStream.skip`.
@@ -161,3 +164,16 @@ It would then skip the number of bytes specified in the length field.
 If the partial flag was set, this process would repeat for the following chunk.
 In total, there would be 1024 reads of 4 bytes each, totaling 4096 bytes, in order to skip 1 GiB of data.
 If the data were read from disks, this might require 1024 4 KiB reads totaling 4 MiB.
+
+### Method #2 - Chunking with reassembly during commit
+
+This method uses Method #1's process to perform chunked writes to a transaction.
+However, when a segment store commits a transaction, it will reassemble any chunked events.
+The read process will remain identical to the current implementation, except that the event
+length can be up to 2 GiB.
+In particular, readers will not need to handle partial flags and the process for skipping events will be trivial.
+
+It should be considered to increase the event size limit beyond a signed 32-bit integer (2 GiB).
+A base 128 varint can encode values 0-127 with only 1 byte, making it very efficient for tiny messages.
+It can also encode very large integers with 7/8 efficiency.
+See https://developers.google.com/protocol-buffers/docs/encoding#varints.
