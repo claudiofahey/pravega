@@ -150,7 +150,7 @@ public class SampleUsage {
         byte[] data3 = new byte[] { 13, 14 };
 
         FileTransaction tx1 = writer.beginTxn();
-        FileOutputStream os1 = tx1.beginWriteEvent("routingKey1");
+        TransactionalFileOutputStream os1 = tx1.beginWriteEvent("routingKey1");
         os1.write(data1);
         os1.write(data2);
         os1.close();
@@ -162,7 +162,7 @@ public class SampleUsage {
         // Within a single transaction, writeEvent and beginWriteEvent can both be called any number of times.
         FileTransaction tx2 = writer.beginTxn();
         tx2.writeEvent("routingKey1", ByteBuffer.wrap(data1));
-        FileOutputStream os2 = tx2.beginWriteEvent("routingKey3");
+        TransactionalFileOutputStream os2 = tx2.beginWriteEvent("routingKey3");
         os2.write(data3);
         os2.close();
         tx2.commit();
@@ -170,7 +170,7 @@ public class SampleUsage {
         // We can also get EventPointers after committing the transaction.
         FileTransaction tx3 = writer.beginTxn();
         CompletableFuture<EventPointer> future3 = tx3.writeEventAndReturnPointer("routingKey1", ByteBuffer.wrap(data1));
-        FileOutputStream os3 = tx3.beginWriteEvent("routingKey3");
+        TransactionalFileOutputStream os3 = tx3.beginWriteEvent("routingKey3");
         os3.write(data2);
         CompletableFuture<EventPointer> future4 = os3.closeAndReturnEventPointer();
         tx3.commit();
