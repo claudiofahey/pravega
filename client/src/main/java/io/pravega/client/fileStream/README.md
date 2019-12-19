@@ -102,3 +102,7 @@ Feedback is appreciated on the possible features below.
 
 - The new method `CompletableFuture<Void> writeEvent(String routingKey, ByteBuffer... event)`
   accepts an unlimited sequence of ByteBuffers. These will be concatenated to build a single event.
+
+## Implementation Ideas
+
+See [Implementation Ideas](ImplementationIdeas.md).

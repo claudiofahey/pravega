@@ -83,6 +83,12 @@ If the partial flag was set, this process would repeat for the following chunk.
 In total, there would be 1024 reads of 4 bytes each, totaling 4096 bytes, in order to skip 1 GiB of data.
 If the data were read from disks, this might require 1024 4 KiB reads totaling 4 MiB.
 
+Since skipping requires interpreting the events, we want to avoid this occurring on the segment store.
+Instead, the skipping logic should be completely handled on the client.
+When the client is on a remote network, a simple implementation of this will cause significant latency between each chunk that is skipped.
+To reduce this effect, the client can use a simple predictive read-ahead algorithm to read multiple byte ranges from the segment store.
+This will be effective as long as all chunks except the last are the same size.
+
 ### Method #2 - Chunking with reassembly during commit
 
 This method uses Method #1's process to perform chunked writes to a transaction.
@@ -90,6 +96,9 @@ However, when a segment store commits a transaction, it will reassemble any chun
 The read process will remain identical to the current implementation, except that the event
 length can be up to 2 GiB.
 In particular, readers will not need to handle partial flags and the process for skipping events will be trivial.
+
+Cons: This requires the segment store to interpret the byte stream.
+This is contrary to the design of the segment store and should be avoided.
 
 It should be considered to increase the event size limit beyond a signed 32-bit integer (2 GiB).
 A base 128 varint can encode values 0-127 with only 1 byte, making it very efficient for tiny messages.
