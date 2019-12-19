@@ -18,15 +18,15 @@ import java.util.concurrent.CompletableFuture;
 public class SampleUsage2 {
 
     /**
-     * A standard POD class that must fit completely in memory.
+     * A standard POJO class that must fit completely in memory.
      * This is easy and elegant to handle.
      */
     static class MyEventA {
-        // This could be an ID for this instance.
+        // Header
         int metadata1;
         int metadata2;
-        // This could be a JPEG image or zip file.
-        byte[] data;
+        // Body
+        byte[] body;
     }
 
     /**
@@ -36,14 +36,14 @@ public class SampleUsage2 {
         public void serialize(OutputStream out, MyEventA value) throws IOException {
             out.write(value.metadata1);
             out.write(value.metadata2);
-            out.write(value.data);
+            out.write(value.body);
         }
 
         public MyEventA deserialize(InputStream src) throws IOException {
             MyEventA evt = new MyEventA();
             evt.metadata1 = src.read();
             evt.metadata2 = src.read();
-            evt.data = IOUtils.toByteArray(src);
+            evt.body = IOUtils.toByteArray(src);
             return evt;
         }
     }
@@ -80,11 +80,13 @@ public class SampleUsage2 {
      * The data does not need to fit in memory and can be a file, TCP socket, GZIPOutputStream, CipherOutputStream, etc.
      */
     static class MyEventB {
+        // Header
         int metadata1;
         int metadata2;
-        // Ugly: We must use a different type depending on whether we intend to read or write the data.
-        InputStream dataIn;
-        OutputStream dataOut;
+        // Body
+        // Ugly: We must use a different type depending on whether we intend to read or write the body.
+        InputStream bodyIn;
+        OutputStream bodyOut;
     }
 
     /**
@@ -94,7 +96,7 @@ public class SampleUsage2 {
         public void serialize(OutputStream out, MyEventB value) throws IOException {
             out.write(value.metadata1);
             out.write(value.metadata2);
-            IOUtils.copyLarge(value.dataIn, out);
+            IOUtils.copyLarge(value.bodyIn, out);
         }
 
         /**
@@ -104,9 +106,9 @@ public class SampleUsage2 {
             MyEventB value = new MyEventB();
             value.metadata1 = src.read();
             value.metadata2 = src.read();
-            // FATAL PROBLEM: What do we set dataOut to?
-            value.dataOut = ???;
-            IOUtils.copyLarge(src, value.dataOut);
+            // FATAL PROBLEM: What do we set bodyOut to?
+            value.bodyOut = ???;
+            IOUtils.copyLarge(src, value.bodyOut);
             return value;
         }
     }
@@ -122,9 +124,9 @@ public class SampleUsage2 {
         MyEventB evt2 = new MyEventB();
         evt2.metadata1 = 1;
         evt2.metadata2 = 2;
-        evt2.dataIn = new java.io.FileInputStream("/tmp/file2");
+        evt2.bodyIn = new java.io.FileInputStream("/tmp/file2");
         CompletableFuture<Void> future2 = writer.writeEvent("routingKey1", evt2);
-        evt2.dataIn.close();
+        evt2.bodyIn.close();
         writer.close();
     }
 
@@ -135,7 +137,7 @@ public class SampleUsage2 {
         public void deserialize(InputStream src, MyEventB value) throws IOException {
             value.metadata1 = src.read();
             value.metadata2 = src.read();
-            IOUtils.copyLarge(src, value.dataOut);
+            IOUtils.copyLarge(src, value.bodyOut);
         }
     }
 
@@ -148,12 +150,12 @@ public class SampleUsage2 {
         EventStreamReader<MyEventB> reader = clientFactory.createReader(readerId, readerGroup, new MyEventBSerializer2(), config);
         MyEventB event = new MyEventB();
         for (int i = 0 ;; i++) {
-            event.dataOut = new java.io.FileOutputStream("/tmp/file" + i);
+            event.bodyOut = new java.io.FileOutputStream("/tmp/file" + i);
             EventRead<MyEventB> eventRead = reader.readNextEvent(timeout, event);
             if (eventRead.getEvent() != null) {
                 System.out.print(eventRead.getEvent());
             }
-            event.dataOut.close();
+            event.bodyOut.close();
         }
     }
 
@@ -166,7 +168,7 @@ public class SampleUsage2 {
         public MyEventB deserialize(InputStream src) throws IOException {
             event.metadata1 = src.read();
             event.metadata2 = src.read();
-            IOUtils.copyLarge(src, event.dataOut);
+            IOUtils.copyLarge(src, event.bodyOut);
             return event;
         }
     }
@@ -180,12 +182,12 @@ public class SampleUsage2 {
         serializer.event = new MyEventB();
         EventStreamReader<MyEventB> reader = clientFactory.createReader(readerId, readerGroup, serializer, config);
         for (int i = 0 ;; i++) {
-            serializer.event.dataOut = new java.io.FileOutputStream("/tmp/file" + i);
+            serializer.event.bodyOut = new java.io.FileOutputStream("/tmp/file" + i);
             EventRead<MyEventB> eventRead = reader.readNextEvent(timeout);
             if (eventRead.getEvent() != null) {
                 System.out.print(eventRead.getEvent());
             }
-            serializer.event.dataOut.close();
+            serializer.event.bodyOut.close();
         }
     }
 }
