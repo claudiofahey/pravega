@@ -1,5 +1,6 @@
 package io.pravega.client.fileStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pravega.client.stream.EventPointer;
 import io.pravega.client.stream.EventRead;
 import org.apache.commons.io.IOUtils;
@@ -72,6 +73,53 @@ public class SampleUsage {
             if (inputStream != null) {
                 // Copy event contents to a normal file.
                 OutputStream outputStream = new java.io.FileOutputStream("/tmp/file" + i);
+                IOUtils.copyLarge(inputStream, outputStream);
+                inputStream.close();
+                outputStream.close();
+            }
+        }
+    }
+
+    static class MyEventHeader {
+        int metadata1;
+        String metadata2;
+
+        public MyEventHeader(int metadata1, String metadata2) {
+            this.metadata1 = metadata1;
+            this.metadata2 = metadata2;
+        }
+    }
+
+    /**
+     * This demonstrates how to write a JSON header followed by the body that will come from a FileInputStream.
+     */
+    void SampleHeaderBodyWriter() throws Exception {
+        final FileStreamWriter writer = fileStreamClientFactory.createWriter(streamName, config);
+        ObjectMapper jsonSerializer = new ObjectMapper();
+        FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
+        MyEventHeader header1 = new MyEventHeader(123, "123");
+        jsonSerializer.writeValue(os1, header1);
+        InputStream is1 = new java.io.FileInputStream("/tmp/body1");
+        IOUtils.copyLarge(is1, os1);
+        is1.close();
+        EventPointer ptr1 = os1.closeAndReturnEventPointer().get();
+        writer.flush();
+    }
+
+    /**
+     * This demonstrates how to read a JSON header followed by the body that will be written to a FileOutputStream.
+     */
+    void SampleHeaderBodyReader() throws Exception {
+        final long timeout = 1000;
+        FileStreamReader reader = fileStreamClientFactory.createReader(readerId, readerGroup, config);
+        ObjectMapper jsonSerializer = new ObjectMapper();
+        for (int i = 0 ;; i++) {
+            EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
+            FileInputStream inputStream = eventRead.getEvent();
+            if (inputStream != null) {
+                MyEventHeader header = jsonSerializer.readValue(inputStream, MyEventHeader.class);
+                // Copy the rest of the event contents to a normal file.
+                OutputStream outputStream = new java.io.FileOutputStream("/tmp/body" + header.metadata1);
                 IOUtils.copyLarge(inputStream, outputStream);
                 inputStream.close();
                 outputStream.close();
