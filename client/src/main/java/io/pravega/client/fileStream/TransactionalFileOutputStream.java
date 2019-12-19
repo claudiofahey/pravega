@@ -52,14 +52,14 @@ public abstract class TransactionalFileOutputStream extends OutputStream {
     public abstract void close() throws IOException;
 
     /**
-     * Same as {@link #close} but also returns a future for the {@link EventPointer}.
-     *
-     * When using this method, there is no guarantee of durability or readability until
-     * {@link FileTransaction#commit} is called.
+     * Returns a future for the {@link EventPointer}.
+     * This must be called before {@link #close}.
      *
      * @return A future that will complete when the {@link EventPointer} becomes available and
-     * can be used to immediately read the event.
-     * This will occur only after {@link FileTransaction#commit} is called.
+     *         can be used to immediately read the event.
+     *         This implies that the event has been durably stored on the configured
+     *         number of replicas, and is available for readers to see.
+     *         This future will complete sometime after both {@link #close} and {@link FileTransaction#commit} are called.
      */
-    public abstract CompletableFuture<EventPointer> closeAndReturnEventPointer() throws IOException;
+    public abstract CompletableFuture<EventPointer> getEventPointerFuture() throws IOException;
 }

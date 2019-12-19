@@ -22,12 +22,12 @@ public class SampleUsage {
         byte[] data2 = new byte[] { 10, 11, 12 };
 
         // Write byte arrays and commit.
-        FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
-        // beginWriteEvent does not perform any Pravega RPCs.
-        os1.write(data1);
-        os1.write(data2);
-        // No data is available to readers yet.
-        os1.close();
+        try (FileOutputStream os1 = writer.beginWriteEvent("routingKey1")) {
+            // beginWriteEvent does not perform any Pravega RPCs.
+            os1.write(data1);
+            os1.write(data2);
+            // No data is available to readers yet.
+        }
         // The entire event may now be available to readers but this is not guaranteed.
         writer.flush();
         // Now the entire event is guaranteed to be available to readers.
@@ -38,26 +38,26 @@ public class SampleUsage {
 
         // Copy large file from file system to the Pravega stream.
         // The size is unlimited (more than 2 GB).
-        InputStream is2 = new java.io.FileInputStream("/tmp/file2");
-        FileOutputStream os2 = writer.beginWriteEvent("routingKey2");
-        IOUtils.copyLarge(is2, os2);
-        is2.close();
-        // Close the OutputStream and get the EventPointer so that we can read this specific event later.
-        EventPointer ptr1 = os2.closeAndReturnEventPointer().get();
+        CompletableFuture<EventPointer> future2;
+        try (InputStream is2 = new java.io.FileInputStream("/tmp/file2");
+             FileOutputStream os2 = writer.beginWriteEvent("routingKey2")) {
+            // Get a future to the EventPointer so that we can read this specific event later.
+            future2 = os2.getEventPointerFuture();
+            IOUtils.copyLarge(is2, os2);
+        }
+        EventPointer ptr2 = future2.get();
         // TODO: Serialize EventPointer and persist it.
 
         // Write files 3 and 4. Both files will be open at the same time.
         // They will be written as separate transactions and will NOT be interleaved.
-        FileOutputStream os3 = writer.beginWriteEvent("routingKey3");
-        FileOutputStream os4 = writer.beginWriteEvent("routingKey4");
-        os3.write(data1);
-        os4.write(data2);
-        os3.write(data2);
-        os4.write(data1);
-        CompletableFuture<Void> future4 = os4.closeAndReturnReadabilityFuture();
-        CompletableFuture<Void> future3 = os3.closeAndReturnReadabilityFuture();
-        future4.get();
-        future3.get();
+        // Since file 4 will closed first, it will be written to the stream first.
+        try (FileOutputStream os3 = writer.beginWriteEvent("routingKey3");
+             FileOutputStream os4 = writer.beginWriteEvent("routingKey4")) {
+            os3.write(data1);
+            os4.write(data2);
+            os3.write(data2);
+            os4.write(data1);
+        }
     }
 
     /**
@@ -95,15 +95,17 @@ public class SampleUsage {
      */
     void SampleHeaderBodyWriter() throws Exception {
         final FileStreamWriter writer = fileStreamClientFactory.createWriter(streamName, config);
-        ObjectMapper jsonSerializer = new ObjectMapper();
-        FileOutputStream os1 = writer.beginWriteEvent("routingKey1");
-        MyEventHeader header1 = new MyEventHeader(123, "123");
-        jsonSerializer.writeValue(os1, header1);
-        InputStream is1 = new java.io.FileInputStream("/tmp/body1");
-        IOUtils.copyLarge(is1, os1);
-        is1.close();
-        EventPointer ptr1 = os1.closeAndReturnEventPointer().get();
+        final ObjectMapper jsonSerializer = new ObjectMapper();
+        CompletableFuture<EventPointer> future1;
+        try (InputStream is1 = new java.io.FileInputStream("/tmp/body1");
+             FileOutputStream os1 = writer.beginWriteEvent("routingKey1")) {
+            future1 = os1.getEventPointerFuture();
+            MyEventHeader header1 = new MyEventHeader(123, "123");
+            jsonSerializer.writeValue(os1, header1);
+            IOUtils.copyLarge(is1, os1);
+        }
         writer.flush();
+        EventPointer ptr1 = future1.get();
     }
 
     /**
@@ -117,12 +119,13 @@ public class SampleUsage {
             EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
             FileInputStream inputStream = eventRead.getEvent();
             if (inputStream != null) {
+                // TODO: Does this stop and the end of the JSON object or does it ready until EOF?
                 MyEventHeader header = jsonSerializer.readValue(inputStream, MyEventHeader.class);
                 // Copy the rest of the event contents to a normal file.
-                OutputStream outputStream = new java.io.FileOutputStream("/tmp/body" + header.metadata1);
-                IOUtils.copyLarge(inputStream, outputStream);
+                try (OutputStream outputStream = new java.io.FileOutputStream("/tmp/body" + header.metadata1)) {
+                    IOUtils.copyLarge(inputStream, outputStream);
+                }
                 inputStream.close();
-                outputStream.close();
             }
         }
     }
@@ -136,20 +139,18 @@ public class SampleUsage {
         // Copy 2 large files to the Pravega stream concurrently.
         final ExecutorService executor = new ForkJoinPool();
         executor.submit(() -> {
-            InputStream is = new java.io.FileInputStream("/tmp/file5");
-            FileOutputStream os = writer.beginWriteEvent("routingKey5");
-            final long bytesCopied = IOUtils.copyLarge(is, os);
-            is.close();
-            os.close();
-            return bytesCopied;
+            try (InputStream is = new java.io.FileInputStream("/tmp/file5");
+                 FileOutputStream os = writer.beginWriteEvent("routingKey5")) {
+                final long bytesCopied = IOUtils.copyLarge(is, os);
+                return bytesCopied;
+            }
         });
         executor.submit(() -> {
-            InputStream is = new java.io.FileInputStream("/tmp/file6");
-            FileOutputStream os = writer.beginWriteEvent("routingKey6");
-            final long bytesCopied = IOUtils.copyLarge(is, os);
-            is.close();
-            os.close();
-            return bytesCopied;
+            try (InputStream is = new java.io.FileInputStream("/tmp/file6");
+                 FileOutputStream os = writer.beginWriteEvent("routingKey6")) {
+                final long bytesCopied = IOUtils.copyLarge(is, os);
+                return bytesCopied;
+            }
         });
     }
 
@@ -164,13 +165,14 @@ public class SampleUsage {
             EventRead<FileInputStream> eventRead = reader.readNextEventAsStream(timeout);
             FileInputStream inputStream = eventRead.getEvent();
             if (inputStream != null) {
-                OutputStream outputStream = new java.io.FileOutputStream("/tmp/file" + i);
+                String fileName = "/tmp/file" + i;
                 // Submit a task to copy the event contents to a file.
                 executor.submit(() -> {
-                    final long bytesCopied = IOUtils.copyLarge(inputStream, outputStream);
-                    inputStream.close();
-                    outputStream.close();
-                    return bytesCopied;
+                    try (OutputStream outputStream = new java.io.FileOutputStream(fileName)) {
+                        final long bytesCopied = IOUtils.copyLarge(inputStream, outputStream);
+                        inputStream.close();
+                        return bytesCopied;
+                    }
                 });
             }
         }
@@ -198,10 +200,10 @@ public class SampleUsage {
         byte[] data3 = new byte[] { 13, 14 };
 
         FileTransaction tx1 = writer.beginTxn();
-        TransactionalFileOutputStream os1 = tx1.beginWriteEvent("routingKey1");
-        os1.write(data1);
-        os1.write(data2);
-        os1.close();
+        try (TransactionalFileOutputStream os1 = tx1.beginWriteEvent("routingKey1")) {
+            os1.write(data1);
+            os1.write(data2);
+        }
         // No data is available to readers yet.
         tx1.commit();
         // Now the entire event is guaranteed to be durably persisted. It may not be immediately available to readers.
@@ -210,17 +212,19 @@ public class SampleUsage {
         // Within a single transaction, writeEvent and beginWriteEvent can both be called any number of times.
         FileTransaction tx2 = writer.beginTxn();
         tx2.writeEvent("routingKey1", ByteBuffer.wrap(data1));
-        TransactionalFileOutputStream os2 = tx2.beginWriteEvent("routingKey3");
-        os2.write(data3);
-        os2.close();
+        try (TransactionalFileOutputStream os2 = tx2.beginWriteEvent("routingKey3")) {
+            os2.write(data3);
+        }
         tx2.commit();
 
         // We can also get EventPointers after committing the transaction.
         FileTransaction tx3 = writer.beginTxn();
         CompletableFuture<EventPointer> future3 = tx3.writeEventAndReturnPointer("routingKey1", ByteBuffer.wrap(data1));
-        TransactionalFileOutputStream os3 = tx3.beginWriteEvent("routingKey3");
-        os3.write(data2);
-        CompletableFuture<EventPointer> future4 = os3.closeAndReturnEventPointer();
+        CompletableFuture<EventPointer> future4;
+        try (TransactionalFileOutputStream os3 = tx3.beginWriteEvent("routingKey3")) {
+            future4 = os3.getEventPointerFuture();
+            os3.write(data2);
+        }
         tx3.commit();
         EventPointer ptr3 = future3.get();
         EventPointer ptr4 = future4.get();

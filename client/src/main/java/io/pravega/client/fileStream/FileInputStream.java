@@ -72,6 +72,7 @@ public abstract class FileInputStream extends InputStream implements Asynchronou
 
     /**
      * Closes the reader.
+     * This indicates that the event has been completely processed.
      * This may block on an ongoing {@link #read()} request if there is one.
      * See {@link InputStream#close()}
      */

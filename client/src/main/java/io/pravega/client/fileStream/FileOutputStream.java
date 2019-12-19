@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Allows for writing the content of a single event using the {@link OutputStream} interface.
  */
-public abstract class FileOutputStream extends OutputStream {
+public abstract class FileOutputStream extends OutputStream implements AutoCloseable {
 
     /**
      * Writes the provided data to buffers in preparation for appending to a Pravega stream.
@@ -48,26 +48,27 @@ public abstract class FileOutputStream extends OutputStream {
     public abstract void close() throws IOException;
 
     /**
-     * Same as {@link #close} but also returns a future that will complete when the event becomes
-     * durably stored and readable.
-     *
-     * This has the same guarantees as {@link EventStreamWriter#writeEvent}.
+     * Returns a future that will complete when the event becomes durably stored and readable.
+     * This must be called before {@link #close}.
      *
      * @return A completableFuture that will complete when the event has been durably stored on the configured
      *         number of replicas, and is available for readers to see. This future may complete exceptionally
      *         if this cannot happen, however these exceptions are not transient failures. Failures that occur
      *         as a result of connection drops or host death are handled internally with multiple retires and
      *         exponential backoff. So there is no need to attempt to retry in the event of an exception.
+     *         This future will complete sometime after {@link #close} is called.
      */
-    public abstract CompletableFuture<Void> closeAndReturnReadabilityFuture() throws IOException;
+    public abstract CompletableFuture<Void> getReadabilityFuture() throws IOException;
 
     /**
-     * Same as {@link #close} but also returns a future for the {@link EventPointer}.
-     *
-     * This has the same guarantees as {@link EventStreamWriter#writeEvent}.
+     * Returns a future for the {@link EventPointer}.
+     * This must be called before {@link #close}.
      *
      * @return A future that will complete when the {@link EventPointer} becomes available and
-     * can be used to immediately read the event.
+     *         can be used to immediately read the event.
+     *         This implies that the event has been durably stored on the configured
+     *         number of replicas, and is available for readers to see.
+     *         This future will complete sometime after {@link #close} is called.
      */
-    public abstract CompletableFuture<EventPointer> closeAndReturnEventPointer() throws IOException;
+    public abstract CompletableFuture<EventPointer> getEventPointerFuture() throws IOException;
 }

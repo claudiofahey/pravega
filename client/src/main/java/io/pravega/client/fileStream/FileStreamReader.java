@@ -23,6 +23,9 @@ public interface FileStreamReader extends EventStreamReader<ByteBuffer> {
     /**
      * Similar to {@link #readNextEvent} but this returns a {@link FileInputStream}
      * that can be used to read the content of the next event.
+     * Calling this method does not indicate that the previously returned event has been completely processed.
+     * That is indicated by calling {@link FileInputStream#close}.
+     * This method may block if the previously returned {@link FileInputStream} has not been closed.
      */
     EventRead<FileInputStream> readNextEventAsStream(long timeout) throws ReinitializationRequiredException, TruncatedDataException;
 
