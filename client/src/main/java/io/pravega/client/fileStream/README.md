@@ -69,6 +69,7 @@ File API B is this one.
   File API B only includes event headers in a transaction.
   A transaction abort will leave the body in storage.
   There is no simple way to remove such bodies from storage.
+  However, transaction aborts should be rare.
 
 - Truncation:
 
