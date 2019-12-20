@@ -9,6 +9,8 @@
  */
 package io.pravega.client.fileStream;
 
+import io.pravega.client.stream.EventPointer;
+
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +18,7 @@ import java.nio.channels.AsynchronousChannel;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Allows for reading raw bytes from an event using the {@link InputStream} interface.
+ * Allows for reading raw bytes from an {@link EventPointer} using the {@link InputStream} interface.
  *
  * This class is designed such that it can be used with
  * or without blocking. To avoid blocking use the {@link #onDataAvailable()} method to make sure to
@@ -72,7 +74,6 @@ public abstract class FileInputStream extends InputStream implements Asynchronou
 
     /**
      * Closes the reader.
-     * This indicates that the event has been completely processed.
      * This may block on an ongoing {@link #read()} request if there is one.
      * See {@link InputStream#close()}
      */
