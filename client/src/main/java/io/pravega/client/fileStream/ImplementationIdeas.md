@@ -104,3 +104,24 @@ It should be considered to increase the event size limit beyond a signed 32-bit 
 A base 128 varint can encode values 0-127 with only 1 byte, making it very efficient for tiny messages.
 It can also encode very large integers with 7/8 efficiency.
 See https://developers.google.com/protocol-buffers/docs/encoding#varints.
+
+### Method #3 - Chunking with patching during commit
+
+When an event larger than 1 MB is written, it will be serialized to a transactional segment with a
+placeholder length prefix. The client will note the offset to the placeholder length prefix.
+Additional data chunks will be written to transactional segments until the entire event has been written.
+At that point, the client will note the final event length and record a PATCH record
+consisting of {segment ID, offset to length prefix, length of length prefix (4), 32-bit integer length of event}.
+Additional events may be written to the same transaction and PATCH records will be created
+for any events larger than 1 MB.
+Prior to flush or commit, the list of PATCH records will be sent to the Pravega server.
+Upon commit, the PATCH instructions will be applied to the segments, ensuring that length-prefixes are correct.
+
+This avoids having the segment store interpret bytes.
+
+The read process will remain identical to the current implementation, except that the event
+length can be up to 2 GiB.
+In particular, readers will not need to handle partial flags and the process for skipping events will be trivial.
+
+Optional: Consider using a combination of variable-length and fixed-length integer encoding for the length prefixes.
+If done correctly, we could have just 1-byte overhead for very small events, increasing to 6 byte overhead for 1 TB events.
