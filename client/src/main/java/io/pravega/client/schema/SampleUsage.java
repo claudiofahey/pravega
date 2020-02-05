@@ -30,8 +30,6 @@ public class SampleUsage {
                 ClientConfig.builder().build());
         final SerializerFactory serializerFactory = new SerializerFactoryImpl(schemaRegistryURI);
         final Serializer<ObjectNode> deserializer = serializerFactory.createJacksonObjectNodeDeserializer();
-        // Note that the reader group may contain multiple streams from multiple groups.
-        // The Serializer must know the scope and stream name to use per-stream IDs.
         final EventStreamReader<ObjectNode> reader = clientFactory.createReader("readerId", "readerGroup",
                 deserializer, ReaderConfig.builder().build());
         final EventRead<ObjectNode> eventRead = reader.readNextEvent(1000);

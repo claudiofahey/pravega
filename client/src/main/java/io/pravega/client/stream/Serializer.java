@@ -48,6 +48,10 @@ public interface Serializer<T> {
      */
     T deserialize(ByteBuffer serializedValue);
 
+    /**
+     * When used with a schema registry, the deserializer must know the scope and stream that the event
+     * was read from so that the per-stream counter can be resolved.
+     */
     default T deserialize(ByteBuffer serializedValue, Stream stream) {
         return deserialize(serializedValue);
     }
