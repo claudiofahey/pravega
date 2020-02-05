@@ -35,6 +35,11 @@ public interface Serializer<T> {
      */
     ByteBuffer serialize(T value);
 
+
+    default ByteBuffer serialize(T value, Stream stream) {
+        return serialize(value);
+    }
+
     /**
      * Deserializes the given ByteBuffer into an event.
      *
@@ -42,4 +47,8 @@ public interface Serializer<T> {
      * @return The event object.
      */
     T deserialize(ByteBuffer serializedValue);
+
+    default T deserialize(ByteBuffer serializedValue, Stream stream) {
+        return deserialize(serializedValue);
+    }
 }
