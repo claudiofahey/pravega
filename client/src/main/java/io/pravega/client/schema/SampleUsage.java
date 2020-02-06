@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.schema.example.avro.PressureData;
+import io.pravega.client.schema.example.avro.SensorData;
+import io.pravega.client.schema.example.avro.TemperatureData;
 import io.pravega.client.schema.example.avro.User;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
@@ -18,6 +21,7 @@ import org.apache.avro.generic.GenericRecord;
 
 import java.io.File;
 import java.net.URI;
+import java.time.Instant;
 
 public class SampleUsage {
     final URI schemaRegistryURI = URI.create("https://schema-registry.example.com");
@@ -93,10 +97,6 @@ public class SampleUsage {
         // TODO: How can a static writer write multiple types of events?
     }
 
-    /**
-     * This requires the Avro schema user.avsc to be compiled with:
-     * java -jar avro-tools-1.9.1.jar compile schema user.avsc ../../../..
-     */
     void StaticReaderUsingAvro() {
         final EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope("scope",
                 ClientConfig.builder().build());
@@ -122,5 +122,59 @@ public class SampleUsage {
         final User user1 = new User("Ben", 7, "red");
         writer.writeEvent("routingKey", user1);
     }
+
+    void StaticWriterUsingAvroUnion() throws Exception {
+        final EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope("scope",
+                ClientConfig.builder().build());
+        final SerializerFactory serializerFactory = new SerializerFactoryImpl(schemaRegistryURI);
+        final Serializer<SensorData> serializer = serializerFactory.createAvroSerializer(
+                SensorData.class,
+                SerializerFactory.CompressionType.Snappy,
+                SerializerFactory.CompatibilityStrategy.Full);
+        final EventStreamWriter<SensorData> writer = clientFactory.createEventWriter("writerId", "streamName",
+                serializer, EventWriterConfig.builder().build());
+
+        // Write TemperatureData
+        final SensorData sensorData1 = SensorData.newBuilder()
+                .setTimestamp(Instant.now())
+                .setDeviceId("1234")
+                .setData(TemperatureData.newBuilder()
+                        .setTempCelsius(100.0)
+                        .build())
+                .build();
+        writer.writeEvent(sensorData1.getDeviceId().toString(), sensorData1);
+
+        // Write PressureData
+        final SensorData sensorData2 = SensorData.newBuilder()
+                .setTimestamp(Instant.now())
+                .setDeviceId("1234")
+                .setData(PressureData.newBuilder()
+                        .setPressure(11.0)
+                        .build())
+                .build();
+        writer.writeEvent(sensorData2.getDeviceId().toString(), sensorData2);
+    }
+
+    void StaticReaderUsingAvroUnion() {
+        final EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope("scope",
+                ClientConfig.builder().build());
+        final SerializerFactory serializerFactory = new SerializerFactoryImpl(schemaRegistryURI);
+        final Serializer<SensorData> deserializer = serializerFactory.createAvroDeserializer(SensorData.class);
+        final EventStreamReader<SensorData> reader = clientFactory.createReader("readerId", "readerGroup",
+                deserializer, ReaderConfig.builder().build());
+        final EventRead<SensorData> eventRead = reader.readNextEvent(1000);
+        final SensorData sensorData = eventRead.getEvent();
+        final Object data = sensorData.getData();
+        if (data instanceof TemperatureData) {
+            final TemperatureData tempData = (TemperatureData) data;
+            System.out.println(tempData.getTempCelsius());
+        } else if (data instanceof PressureData) {
+            final PressureData pressureData = (PressureData) data;
+            System.out.println(pressureData.getPressure());
+        }
+
+        // TODO: Need to determine whether schemas are compatible when adding types to the union field.
+    }
+
 
 }

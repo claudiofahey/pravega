@@ -1,0 +1,63 @@
+{
+  "name": "SensorData",
+  "namespace": "io.pravega.client.schema.example.avro",
+  "doc": "Demonstrates a union type. An event must contain exactly one of TemperatureData, VibrationData, or PressureData.",
+  "type": "record",
+  "fields": [
+    {
+      "name": "timestamp",
+      "doc": "Event time",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "device_id",
+      "doc": "This is used as the routing key for the stream so it must exist for all types.",
+      "type": "string"
+    },
+    {
+      "name": "data",
+      "type": [
+        {
+          "name": "TemperatureData",
+          "type": "record",
+          "fields": [
+            {
+              "name": "temp_celsius",
+              "type": "double"
+            }
+          ]
+        },
+        {
+          "name": "VibrationData",
+          "type": "record",
+          "fields": [
+            {
+              "name": "vibration1",
+              "type": "double"
+            },
+            {
+              "name": "vibration2",
+              "type": [
+                "null",
+                "double"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "PressureData",
+          "type": "record",
+          "fields": [
+            {
+              "name": "pressure",
+              "type": "double"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
