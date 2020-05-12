@@ -89,7 +89,14 @@ public class ClientConnectionImpl implements ClientConnection {
         });
         // Work around for https://github.com/netty/netty/issues/3246
         eventLoop.execute(() -> {
-            channel.write(cmd, promise);
+            try {
+                channel.write(cmd, promise);
+            } catch (Exception e) {
+                log.warn("Caught exception thrown by channel.write(). Releasing throttle semaphore.", e);
+                throttle.release(cmd.getDataLength());
+                channel.pipeline().fireExceptionCaught(e);
+                channel.close();
+            }
         });
         Exceptions.handleInterrupted(() -> throttle.acquire(cmd.getDataLength()));
     }
