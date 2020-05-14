@@ -217,7 +217,7 @@ public class AppendTest {
     static EmbeddedChannel createChannel(StreamSegmentStore store) {
         ServerConnectionInboundHandler lsh = new ServerConnectionInboundHandler();
         EmbeddedChannel channel = new EmbeddedChannel(new ExceptionLoggingHandler(""),
-                new CommandEncoder(null, MetricNotifier.NO_OP_METRIC_NOTIFIER, () -> { } ),
+                new CommandEncoder(null, MetricNotifier.NO_OP_METRIC_NOTIFIER),
                 new LengthFieldBasedFrameDecoder(MAX_WIRECOMMAND_SIZE, 4, 4),
                 new CommandDecoder(),
                 new AppendDecoder(),
