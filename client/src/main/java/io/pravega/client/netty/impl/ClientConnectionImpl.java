@@ -51,6 +51,7 @@ public class ClientConnectionImpl implements ClientConnection {
         this.connectionName = connectionName;
         this.flowId = flowId;
         this.nettyHandler = nettyHandler;
+        log.error("CLAUDIO05");
     }
 
     @Override
@@ -82,10 +83,12 @@ public class ClientConnectionImpl implements ClientConnection {
         promise.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
+                log.info("write: releasing throttle. datalength={}, throttle={}", dataLength, throttle);
                 throttle.release(dataLength);
                 if (!future.isSuccess()) {
                     future.channel().pipeline().fireExceptionCaught(future.cause());
                 }
+//                throw new RuntimeException("CLAUDIO04");
             }
         });
         // Work around for https://github.com/netty/netty/issues/3246
@@ -93,14 +96,20 @@ public class ClientConnectionImpl implements ClientConnection {
             try {
                 if (!closed.get()) {
                     channel.write(cmd, promise);
+                } else {
+                    log.warn("CLAUDIO: write: already closed. releasing throttle. dataLength={}, throttle={}", dataLength, throttle);
+                    throttle.release(dataLength);
                 }
             } catch (Exception e) {
+                log.warn("CLAUDIO: write: exception. releasing throttle. dataLength={}, throttle={}", dataLength, throttle);
                 throttle.release(dataLength);
                 channel.pipeline().fireExceptionCaught(e);
             }
         });
         Exceptions.handleInterrupted(() -> {
-            if(!throttle.tryAcquire(dataLength, 30, TimeUnit.SECONDS)) {
+            log.info("write: acquiring throttle. datalength={}, throttle={}", dataLength, throttle);
+            if(!throttle.tryAcquire(dataLength, 300, TimeUnit.SECONDS)) {
+                log.warn("write: timeout acquiring throttle. datalength={}, throttle={}", dataLength, throttle);
                 channel.pipeline().fireExceptionCaught(new ConnectionFailedException("Connection throttled for over 30 seconds"));
             }
         });
@@ -184,6 +193,7 @@ public class ClientConnectionImpl implements ClientConnection {
     public void close() {
         if (!closed.getAndSet(true)) {
             nettyHandler.closeFlow(this);
+            log.info("close: releasing throttle. throttle={}", throttle);
             throttle.release(Integer.MAX_VALUE >> 1); //Makes sure that any blocked threads are unblocked.
         }
     }
