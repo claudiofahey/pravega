@@ -19,6 +19,7 @@ import io.netty.util.concurrent.ScheduledFuture;
 import io.pravega.client.stream.impl.ConnectionClosedException;
 import io.pravega.common.Exceptions;
 import io.pravega.common.util.ReusableFutureLatch;
+import io.pravega.common.util.ReusableLatch;
 import io.pravega.shared.metrics.MetricNotifier;
 import io.pravega.shared.protocol.netty.AppendBatchSizeTracker;
 import io.pravega.shared.protocol.netty.ConnectionFailedException;
@@ -56,6 +57,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
     private final ConcurrentHashMap<Integer, ReplyProcessor> flowIdReplyProcessorMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Integer, AppendBatchSizeTracker> flowIDBatchSizeTrackerMap = new ConcurrentHashMap<>();
 
+    private final ReusableLatch appendLatch = new ReusableLatch(true);
     private final AtomicBoolean disableFlow = new AtomicBoolean(false);
 
     public FlowHandler(String connectionName) {
@@ -275,6 +277,23 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
     }
 
     @Override
+    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        super.channelWritabilityChanged(ctx);
+        final Channel ch = ctx.channel();
+        if (ch.isWritable()) {
+            appendLatch.release();
+            log.info("channelWritabilityChanged: releasing appendLatch for {}, this={}", connectionName, this);
+        } else {
+            appendLatch.reset();
+            log.info("channelWritabilityChanged: resetting appendLatch for {}, this={}", connectionName, this);
+        }
+    }
+
+    public void waitForCapacity() {
+        appendLatch.awaitUninterruptibly();
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         invokeProcessingFailureForAllFlows(cause);
     }
@@ -310,6 +329,8 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
                 ch.close();
             }
         }
+        log.info("close: releasing appendLatch for {}, this={}", connectionName, this);
+        appendLatch.release();
     }
 
     private final class KeepAliveTask implements Runnable {

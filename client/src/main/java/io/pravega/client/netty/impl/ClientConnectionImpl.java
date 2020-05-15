@@ -44,7 +44,6 @@ public class ClientConnectionImpl implements ClientConnection {
     @Getter
     private final FlowHandler nettyHandler;
     private final AtomicBoolean closed = new AtomicBoolean(false);
-    private final Semaphore throttle = new Semaphore(AppendBatchSizeTracker.MAX_BATCH_SIZE);
 
     public ClientConnectionImpl(String connectionName, int flowId, FlowHandler nettyHandler) {
         this.connectionName = connectionName;
@@ -80,18 +79,17 @@ public class ClientConnectionImpl implements ClientConnection {
         promise.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-                throttle.release(cmd.getDataLength());
                 if (!future.isSuccess()) {
                     future.channel().pipeline().fireExceptionCaught(future.cause());
                     future.channel().close();
                 }
             }
         });
+        nettyHandler.waitForCapacity();
         // Work around for https://github.com/netty/netty/issues/3246
         eventLoop.execute(() -> {
             channel.write(cmd, promise);
         });
-        Exceptions.handleInterrupted(() -> throttle.acquire(cmd.getDataLength()));
     }
     
     private void write(WireCommand cmd) throws ConnectionFailedException {
