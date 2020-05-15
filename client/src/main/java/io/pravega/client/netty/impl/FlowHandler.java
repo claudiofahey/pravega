@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.AccessLevel;
@@ -282,15 +283,21 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
         final Channel ch = ctx.channel();
         if (ch.isWritable()) {
             appendLatch.release();
-            log.info("channelWritabilityChanged: releasing appendLatch for {}, this={}", connectionName, this);
+            log.info("channelWritabilityChanged: releasing appendLatch for {}, FlowHandler={}", connectionName, this);
         } else {
             appendLatch.reset();
-            log.info("channelWritabilityChanged: resetting appendLatch for {}, this={}", connectionName, this);
+            log.info("channelWritabilityChanged: resetting appendLatch for {}, FlowHandler={}", connectionName, this);
         }
     }
 
     public void waitForCapacity() {
-        appendLatch.awaitUninterruptibly();
+        try {
+            appendLatch.await(120000);
+        } catch (TimeoutException|InterruptedException e) {
+            log.error("waitForCapacity: exception waiting for appendLatch for {}, FlowHandler={}",
+                    connectionName, this, e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -329,7 +336,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
                 ch.close();
             }
         }
-        log.info("close: releasing appendLatch for {}, this={}", connectionName, this);
+        log.info("close: releasing appendLatch for {}, FlowHandler={}", connectionName, this);
         appendLatch.release();
     }
 
@@ -338,6 +345,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
         public void run() {
             try {
                 if (!recentMessage.getAndSet(false)) {
+                    log.info("KeepAliveTask: Sending KeepAlive to {}, FlowHandler={}", connectionName, FlowHandler.this);
                     getChannel().writeAndFlush(new WireCommands.KeepAlive()).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                 }
             } catch (Exception e) {
