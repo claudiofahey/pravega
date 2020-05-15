@@ -292,7 +292,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
 
     public void waitForCapacity() {
         try {
-            appendLatch.await(120000);
+            appendLatch.await(10*60*1000);
         } catch (TimeoutException|InterruptedException e) {
             log.error("waitForCapacity: exception waiting for appendLatch for {}, FlowHandler={}",
                     connectionName, this, e);
