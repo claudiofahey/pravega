@@ -70,6 +70,15 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
         this.metricNotifier = updateMetric;
     }
 
+    @Override
+    public String toString() {
+        return "FlowHandler{" +
+                "id=0x" + Integer.toHexString(System.identityHashCode(this)) +
+                ", connectionName='" + connectionName + '\'' +
+                ", channel=" + channel +
+                '}';
+    }
+
     /**
      * Create a flow on existing connection.
      * @param flow Flow.
@@ -283,10 +292,10 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
         final Channel ch = ctx.channel();
         if (ch.isWritable()) {
             appendLatch.release();
-            log.info("channelWritabilityChanged: releasing appendLatch for {}, FlowHandler={}", connectionName, this);
+            log.info("channelWritabilityChanged: releasing appendLatch for {}", this);
         } else {
             appendLatch.reset();
-            log.info("channelWritabilityChanged: resetting appendLatch for {}, FlowHandler={}", connectionName, this);
+            log.info("channelWritabilityChanged: resetting appendLatch for {}", this);
         }
     }
 
@@ -294,8 +303,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
         try {
             appendLatch.await(10*60*1000);
         } catch (TimeoutException|InterruptedException e) {
-            log.error("waitForCapacity: exception waiting for appendLatch for {}, FlowHandler={}",
-                    connectionName, this, e);
+            log.error("waitForCapacity: exception waiting for appendLatch for {}", this, e);
             throw new RuntimeException(e);
         }
     }
@@ -336,7 +344,7 @@ public class FlowHandler extends ChannelInboundHandlerAdapter implements AutoClo
                 ch.close();
             }
         }
-        log.info("close: releasing appendLatch for {}, FlowHandler={}", connectionName, this);
+        log.info("close: releasing appendLatch for {}", this);
         appendLatch.release();
     }
 
