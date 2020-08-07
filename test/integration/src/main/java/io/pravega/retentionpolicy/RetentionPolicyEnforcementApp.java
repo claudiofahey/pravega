@@ -10,6 +10,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
+/**
+ * This application is intended to run periodically to enforce certain Pravega stream retention policies.
+ * It performs the following functions:
+ *   1. All streams listed in the environment variable ROLLOVER_STREAMS are rolled over.
+ *      This means that all active segments are sealed and they are replaced with
+ *      new segments, using the same key ranges.
+ *      If the streams have been truncated, either manually or due to the stream's retention policy,
+ *      any unused segments will be deleted from the long-term storage, thus reclaiming disk space.
+ */
 @Slf4j
 public class RetentionPolicyEnforcementApp {
     private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(5);
