@@ -25,6 +25,8 @@ import org.junit.rules.Timeout;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 
 /**
  * Performance benchmarks for FileSystemStorage.
@@ -39,7 +41,8 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
     @Before
     public void setUp() throws Exception {
 //        this.baseDir = Files.createTempDirectory("test_nfs").toFile().getAbsoluteFile();
-        this.baseDir = new File("/mnt/lab9-isilon/home/faheyc/tmp");
+//        this.baseDir = new File("/mnt/lab9-isilon/home/faheyc/tmp");
+        this.baseDir = new File("/mnt/isilon1/tmp/FileSystemStoragePerfTest");
         log.info("baseDir={}", baseDir);
         this.adapterConfig = FileSystemStorageConfig
                 .builder()
@@ -50,7 +53,7 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
 
     @After
     public void tearDown() {
-        FileHelpers.deleteFileOrDirectory(baseDir);
+//        FileHelpers.deleteFileOrDirectory(baseDir);
         baseDir = null;
     }
 
@@ -60,42 +63,55 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
      */
     @Test(timeout = 0)
     public void benchmarkRead() throws Exception {
-        final String segmentName = "foo_write";
-        final long eventCount = 10*1024;
-        final int eventSize = 1024*1024;
-        final long sleepNanos = 4*1000*1000;
+        final double totalGiB = 200.0;
+        final int eventSize = 64*1024*1024;
+        final long eventCount = (long) (totalGiB * 1024 * 1024 * 1024 / eventSize);
+        log.info("totalGiB={}, eventSize={}, eventCount={}", totalGiB, eventSize, eventCount);
+        final String segmentName = String.format("benchmarkRead-%dMiB", eventCount * eventSize / 1024 / 1024);
+        log.info("segmentName={}", segmentName);
+        final long sleepNanos = 0*1000*1000;
+        final int permits = 10;
 
         try (Storage s = createStorage()) {
             s.initialize(DEFAULT_EPOCH);
-            s.create(segmentName, TIMEOUT).join();
 
-            log.info("Writing");
-            final val writeHandle = s.openWrite(segmentName).join();
-            long offset = 0;
-            final byte[] writeData = new byte[eventSize];
-            new Random().nextBytes(writeData);
-            for (long j = 0; j < eventCount; j++) {
-                ByteArrayInputStream dataStream = new ByteArrayInputStream(writeData);
-                s.write(writeHandle, offset, dataStream, writeData.length, TIMEOUT).join();
-                offset += writeData.length;
+            if (s.exists(segmentName, TIMEOUT).join()) {
+                log.info("Segment already exists. Skipping write.");
+            } else {
+                log.info("Writing");
+                s.create(segmentName, TIMEOUT).join();
+                final val writeHandle = s.openWrite(segmentName).join();
+                final byte[] writeData = new byte[eventSize];
+                new Random().nextBytes(writeData);
+                long offset = 0;
+                for (long j = 0; j < eventCount; j++) {
+                    ByteArrayInputStream dataStream = new ByteArrayInputStream(writeData);
+                    s.write(writeHandle, offset, dataStream, writeData.length, TIMEOUT).join();
+                    offset += writeData.length;
+                }
             }
 
             log.info("Reading");
-            offset = 0;
+            long offset = 0;
             final val readHandle = s.openRead(segmentName).join();
             final byte[] readBuffer = new byte[eventSize];
             final long t0 = System.currentTimeMillis();
+            final Semaphore sem = new Semaphore(permits);
             for (long j = 0; j < eventCount; j++) {
-                int bytesRead = s.read(readHandle, offset, readBuffer, 0, readBuffer.length, TIMEOUT).join();
-                Assert.assertEquals(String.format("Unexpected number of bytes read from offset %d.", offset),
-                        eventSize, bytesRead);
-                offset += bytesRead;
-                // Simulate delay between reads. We use a busy wait to have precise control over the delay.
-                if (sleepNanos > 0) {
-                    final long sleepStart = System.nanoTime();
-                    while (System.nanoTime() - sleepStart < sleepNanos);
-                }
+                sem.acquire();
+                final CompletableFuture<Integer> future = s.read(readHandle, offset, readBuffer, 0, readBuffer.length, TIMEOUT);
+                future.thenAccept(bytesRead -> {
+                    Assert.assertEquals("Unexpected number of bytes read.", eventSize, (long) bytesRead);
+                    // Simulate delay between reads. We use a busy wait to have precise control over the delay.
+                    if (sleepNanos > 0) {
+                        final long sleepStart = System.nanoTime();
+                        while (System.nanoTime() - sleepStart < sleepNanos) ;
+                    }
+                    sem.release();
+                });
+                offset += eventSize;
             }
+            sem.acquire(permits);
             final double elapsedSec = (System.currentTimeMillis() - t0) / 1000.0;
             final double megabytesPerSec = (double) eventSize * eventCount / 1e6 / elapsedSec;
             log.info("Read rate: {} MB/sec", megabytesPerSec);
