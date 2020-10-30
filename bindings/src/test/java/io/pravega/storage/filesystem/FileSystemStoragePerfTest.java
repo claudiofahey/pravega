@@ -70,7 +70,7 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
         final String segmentName = String.format("benchmarkRead-%dMiB", eventCount * eventSize / 1024 / 1024);
         log.info("segmentName={}", segmentName);
         final long sleepNanos = 0*1000*1000;
-        final int permits = 10;
+        final int concurrentReads = 10;
 
         try (Storage s = createStorage()) {
             s.initialize(DEFAULT_EPOCH);
@@ -96,7 +96,7 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
             final val readHandle = s.openRead(segmentName).join();
             final byte[] readBuffer = new byte[eventSize];
             final long t0 = System.currentTimeMillis();
-            final Semaphore sem = new Semaphore(permits);
+            final Semaphore sem = new Semaphore(concurrentReads);
             for (long j = 0; j < eventCount; j++) {
                 sem.acquire();
                 final CompletableFuture<Integer> future = s.read(readHandle, offset, readBuffer, 0, readBuffer.length, TIMEOUT);
@@ -111,7 +111,7 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
                 });
                 offset += eventSize;
             }
-            sem.acquire(permits);
+            sem.acquire(concurrentReads);
             final double elapsedSec = (System.currentTimeMillis() - t0) / 1000.0;
             final double megabytesPerSec = (double) eventSize * eventCount / 1e6 / elapsedSec;
             log.info("Read rate: {} MB/sec", megabytesPerSec);
