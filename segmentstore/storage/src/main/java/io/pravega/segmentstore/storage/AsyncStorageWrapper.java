@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -129,9 +128,7 @@ public class AsyncStorageWrapper implements Storage {
 
     @Override
     public CompletableFuture<Integer> read(SegmentHandle handle, long offset, byte[] buffer, int bufferOffset, int length, Duration timeout) {
-//        final String key = handle.getSegmentName();
-        final String key = UUID.randomUUID().toString();
-        return supplyAsync(() -> this.syncStorage.read(handle, offset, buffer, bufferOffset, length), key);
+        return supplyAsync(() -> this.syncStorage.read(handle, offset, buffer, bufferOffset, length), handle.getSegmentName());
     }
 
     @Override
