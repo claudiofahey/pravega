@@ -70,6 +70,7 @@ class SegmentInputStreamImpl implements SegmentInputStream {
         this.minReadLength = Math.min(DEFAULT_READ_LENGTH, bufferSize);
         this.buffer = new CircularBuffer(bufferSize);
         issueRequestIfNeeded();
+        log.error("CLAUDIO1");
     }
 
     @Override
