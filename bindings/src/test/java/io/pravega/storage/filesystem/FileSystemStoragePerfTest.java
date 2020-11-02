@@ -64,13 +64,15 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
     @Test(timeout = 0)
     public void benchmarkRead() throws Exception {
         final double totalGiB = 200.0;
-        final int eventSize = 64*1024*1024;
+        final int eventSize = 16*1024*1024;
         final long eventCount = (long) (totalGiB * 1024 * 1024 * 1024 / eventSize);
         log.info("totalGiB={}, eventSize={}, eventCount={}", totalGiB, eventSize, eventCount);
         final String segmentName = String.format("benchmarkRead-%dMiB", eventCount * eventSize / 1024 / 1024);
         log.info("segmentName={}", segmentName);
-        final long sleepNanos = 0*1000*1000;
-        final int concurrentReads = 10;
+        final long sleepNanos = 4*1000*1000;
+        log.info("sleepNanos={}", sleepNanos);
+        final int concurrentReads = 1;
+        log.info("concurrentReads={}", concurrentReads);
 
         try (Storage s = createStorage()) {
             s.initialize(DEFAULT_EPOCH);
