@@ -156,7 +156,6 @@ public class PravegaRequestProcessor extends FailingRequestProcessor implements 
     @VisibleForTesting
     public PravegaRequestProcessor(StreamSegmentStore segmentStore, TableStore tableStore, ServerConnection connection) {
         this(segmentStore, tableStore, connection, SegmentStatsRecorder.noOp(), TableSegmentStatsRecorder.noOp(), new PassingTokenVerifier(), false);
-        log.info("MAX_READ_SIZE={}", MAX_READ_SIZE);
     }
 
     /**
@@ -180,6 +179,7 @@ public class PravegaRequestProcessor extends FailingRequestProcessor implements 
         this.statsRecorder = Preconditions.checkNotNull(statsRecorder, "statsRecorder");
         this.tableStatsRecorder = Preconditions.checkNotNull(tableStatsRecorder, "tableStatsRecorder");
         this.replyWithStackTraceOnError = replyWithStackTraceOnError;
+        log.info("MAX_READ_SIZE={}", MAX_READ_SIZE);
     }
 
     //endregion
