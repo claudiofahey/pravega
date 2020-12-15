@@ -41,11 +41,9 @@ import static org.junit.Assert.assertTrue;
 
 @Slf4j
 public class ReadPerformanceTest extends ThreadPooledTestSuite {
-
-    private static final int TIMEOUT_MILLIS = 300000;
-    private ServiceBuilder serviceBuilder;
     @Rule
-    public Timeout globalTimeout = Timeout.millis(TIMEOUT_MILLIS);
+    public Timeout globalTimeout = Timeout.seconds(900);
+    private ServiceBuilder serviceBuilder;
 
     @Before
     public void setup() throws Exception {
@@ -58,10 +56,13 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
         this.serviceBuilder.close();
     }
 
+    /**
+     * Write many events, then read them.
+     */
     @Test
-    public void testReadDirectlyFromStore() throws Exception {
-        log.info("testReadDirectlyFromStore: BEGIN");
-        final String segmentName = "testReadFromStore";
+    public void testHistoricalReadDirectlyFromStore() throws Exception {
+        log.info("testHistoricalReadDirectlyFromStore: BEGIN");
+        final String segmentName = "testHistoricalReadDirectlyFromStore";
         final int eventSize = 2*1024*1024;
         final long desiredTotalBytes = (long) (2.0 * 1024*1024*1024);
         final long numEvents = desiredTotalBytes / eventSize;
@@ -80,11 +81,11 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
             final int maxLength = (int) Longs.constrainToRange(totalBytes - offset, 0, 128*1024*1024);
             @Cleanup
             final ReadResult result = segmentStore.read(segmentName, offset, maxLength, Duration.ZERO).get();
-            log.info("testReadDirectlyFromStore: ReadResult={}", result);
+            log.info("testHistoricalReadDirectlyFromStore: ReadResult={}", result);
             while (result.hasNext()) {
                 final ReadResultEntry entry = result.next();
                 final BufferView contents = entry.getContent().get();
-                log.info("testReadDirectlyFromStore: ReadResultEntry={}, contents.getLength={}",
+                log.info("testHistoricalReadDirectlyFromStore: ReadResultEntry={}, contents.getLength={}",
                         entry, contents.getLength());
                 offset += contents.getLength();
             }
@@ -93,9 +94,9 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
         final double durationSec = (System.nanoTime() - t0) * 1e-9;
         final double megabytes = totalBytes * 1e-6;
         final double megabytesPerSec = megabytes / durationSec;
-        log.info("testReadDirectlyFromStore: durationSec={}, megabytes={}, megabytesPerSec={}",
+        log.info("testHistoricalReadDirectlyFromStore: durationSec={}, megabytes={}, megabytesPerSec={}",
                 durationSec, megabytes, megabytesPerSec);
-        log.info("testReadDirectlyFromStore: END");
+        log.info("testHistoricalReadDirectlyFromStore: END");
     }
 
     private void fillStoreForSegment(String segmentName, UUID clientId, byte[] data, long numEntries,
