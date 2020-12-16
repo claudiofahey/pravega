@@ -31,6 +31,8 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Performance benchmarks for FileSystemStorage.
+ * Run with:
+ *   ./gradlew bindings:test -i --tests io.pravega.storage.filesystem.FileSystemStoragePerfTest.benchmarkRead --rerun-tasks
  */
 @Slf4j
 public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
@@ -42,8 +44,8 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
     @Before
     public void setUp() throws Exception {
 //        this.baseDir = Files.createTempDirectory("test_nfs").toFile().getAbsoluteFile();
-        this.baseDir = new File("/mnt/lab9-isilon/home/faheyc/tmp");
-//        this.baseDir = new File("/mnt/isilon1/tmp/FileSystemStoragePerfTest");
+//        this.baseDir = new File("/mnt/lab9-isilon/home/faheyc/tmp");
+        this.baseDir = new File("/mnt/isilon/tmp/FileSystemStoragePerfTest");
         log.info("baseDir={}", baseDir);
         this.adapterConfig = FileSystemStorageConfig
                 .builder()
@@ -67,13 +69,13 @@ public class FileSystemStoragePerfTest extends IdempotentStorageTestBase {
      */
     @Test(timeout = 0)
     public void benchmarkRead() throws Exception {
-        final double totalGiB = 10.0;
-        final int eventSize = 16*1024*1024;
+        final double totalGiB = 200.0;
+        final int eventSize = 64*1024*1024;
         final long eventCount = (long) (totalGiB * 1024 * 1024 * 1024 / eventSize);
         log.info("totalGiB={}, eventSize={}, eventCount={}", totalGiB, eventSize, eventCount);
         final String segmentName = String.format("benchmarkRead-%dMiB", eventCount * eventSize / 1024 / 1024);
         log.info("segmentName={}", segmentName);
-        final long sleepNanos = 4*1000*1000;
+        final long sleepNanos = 2*1000*1000;
         log.info("sleepNanos={}", sleepNanos);
         final int concurrentReads = 1;
         log.info("concurrentReads={}", concurrentReads);
