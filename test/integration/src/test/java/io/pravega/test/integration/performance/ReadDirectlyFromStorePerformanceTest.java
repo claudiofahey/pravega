@@ -43,7 +43,7 @@ import static org.junit.Assert.assertEquals;
  * the -Xmx parameter in build.gradle, project('test:integration').test.jvmArgs.
  */
 @Slf4j
-public class ReadPerformanceTest extends ThreadPooledTestSuite {
+public class ReadDirectlyFromStorePerformanceTest extends ThreadPooledTestSuite {
     @Rule
     public Timeout globalTimeout = Timeout.seconds(900);
     private ServiceBuilder serviceBuilder;
@@ -74,7 +74,7 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
     public void testHistoricalReadDirectlyFromStore() throws Exception {
         log.info("testHistoricalReadDirectlyFromStore: BEGIN");
         final String segmentName = "testHistoricalReadDirectlyFromStore";
-        final int eventSize = 2*1024*1024;
+        final int eventSize = 1*1024*1024;
         final long desiredTotalBytes = (long) (16*1024*1024*1024L);
         final long numEvents = desiredTotalBytes / eventSize;
         final long totalBytes = numEvents * eventSize;
