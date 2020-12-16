@@ -534,7 +534,7 @@ project('test:integration') {
     }
 
     test {
-        jvmArgs = ["-server", "-Xmx16g", "-XX:+HeapDumpOnOutOfMemoryError",
+        jvmArgs = ["-server", "-Xmx40g", "-XX:+HeapDumpOnOutOfMemoryError",
                    "-Dlog.dir=PRAVEGA_APP_HOME/logs",
                    "-Dlog.name=selftest"]
     }

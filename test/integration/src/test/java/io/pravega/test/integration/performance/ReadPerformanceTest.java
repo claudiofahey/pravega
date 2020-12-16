@@ -14,11 +14,11 @@ import io.netty.buffer.Unpooled;
 import io.pravega.common.util.BufferView;
 import io.pravega.segmentstore.contracts.ReadResult;
 import io.pravega.segmentstore.contracts.ReadResultEntry;
-import io.pravega.segmentstore.contracts.ReadResultEntryType;
 import io.pravega.segmentstore.contracts.SegmentType;
 import io.pravega.segmentstore.contracts.StreamSegmentStore;
 import io.pravega.segmentstore.server.store.ServiceBuilder;
 import io.pravega.segmentstore.server.store.ServiceBuilderConfig;
+import io.pravega.segmentstore.server.store.ServiceConfig;
 import io.pravega.shared.protocol.netty.ByteBufWrapper;
 import io.pravega.test.common.ThreadPooledTestSuite;
 import lombok.Cleanup;
@@ -29,16 +29,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import java.io.InputStream;
 import java.time.Duration;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
+/**
+ * Benchmark historical read performance from the segment store cache
+ * using the StreamSegmentStore interface.
+ * To run this with more than 2 GiB of data, you must increase
+ * the -Xmx parameter in build.gradle, project('test:integration').test.jvmArgs.
+ */
 @Slf4j
 public class ReadPerformanceTest extends ThreadPooledTestSuite {
     @Rule
@@ -47,7 +50,15 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
 
     @Before
     public void setup() throws Exception {
-        this.serviceBuilder = ServiceBuilder.newInMemoryBuilder(ServiceBuilderConfig.getDefaultConfig());
+        final ServiceBuilderConfig serviceBuilderConfig = ServiceBuilderConfig
+                .builder()
+                .include(ServiceConfig.builder()
+                        .with(ServiceConfig.CONTAINER_COUNT, 1)
+                        // Following must be large enough to hold the entire segment because reads from storage do not complete.
+                        .with(ServiceConfig.CACHE_POLICY_MAX_SIZE, 24*1024*1024*1024L)
+                )
+                .build();
+        this.serviceBuilder = ServiceBuilder.newInMemoryBuilder(serviceBuilderConfig);
         this.serviceBuilder.initialize();
     }
 
@@ -64,7 +75,7 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
         log.info("testHistoricalReadDirectlyFromStore: BEGIN");
         final String segmentName = "testHistoricalReadDirectlyFromStore";
         final int eventSize = 2*1024*1024;
-        final long desiredTotalBytes = (long) (2.0 * 1024*1024*1024);
+        final long desiredTotalBytes = (long) (16*1024*1024*1024L);
         final long numEvents = desiredTotalBytes / eventSize;
         final long totalBytes = numEvents * eventSize;
         final byte[] data = new byte[eventSize];
@@ -78,7 +89,7 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
         final long t0 = System.nanoTime();
         long offset = 0;
         while (offset < totalBytes) {
-            final int maxLength = (int) Longs.constrainToRange(totalBytes - offset, 0, 128*1024*1024);
+            final int maxLength = (int) Longs.constrainToRange(totalBytes - offset, 0, 512*1024*1024);
             @Cleanup
             final ReadResult result = segmentStore.read(segmentName, offset, maxLength, Duration.ZERO).get();
             log.info("testHistoricalReadDirectlyFromStore: ReadResult={}", result);
@@ -88,6 +99,7 @@ public class ReadPerformanceTest extends ThreadPooledTestSuite {
                 log.info("testHistoricalReadDirectlyFromStore: ReadResultEntry={}, contents.getLength={}",
                         entry, contents.getLength());
                 offset += contents.getLength();
+                // Note that the actual data bytes are not used.
             }
         }
         assertEquals(totalBytes, offset);
