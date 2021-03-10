@@ -44,14 +44,14 @@ Create a new scope
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Body**|**CreateScopeRequest**  <br>*required*|The scope configuration|[CreateScopeRequest](#createscope-createscoperequest)|
+|**Body**|**CreateScopeRequest**  <br />*required*|The scope configuration|[CreateScopeRequest](#createscope-createscoperequest)|
 
 <a name="createscope-createscoperequest"></a>
 **CreateScopeRequest**
 
 |Name|Description|Schema|
 |---|---|---|
-|**scopeName**  <br>*optional*|**Example** : `"string"`|string|
+|**scopeName**  <br />*optional*|**Example** : `"string"`|string|
 
 
 #### Responses
@@ -160,7 +160,7 @@ Retrieve details of an existing scope
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
 
 
 #### Responses
@@ -211,7 +211,7 @@ Delete a scope
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
 
 
 #### Responses
@@ -248,7 +248,7 @@ List reader groups within the given scope
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
 
 
 #### Responses
@@ -299,8 +299,8 @@ Fetch the properties of an existing reader group
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**readerGroupName**  <br>*required*|Reader group name|string|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
+|**Path**|**readerGroupName**  <br />*required*|Reader group name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
 
 
 #### Responses
@@ -354,17 +354,17 @@ Create a new stream
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Body**|**CreateStreamRequest**  <br>*required*|The stream configuration|[CreateStreamRequest](#createstream-createstreamrequest)|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Body**|**CreateStreamRequest**  <br />*required*|The stream configuration|[CreateStreamRequest](#createstream-createstreamrequest)|
 
 <a name="createstream-createstreamrequest"></a>
 **CreateStreamRequest**
 
 |Name|Description|Schema|
 |---|---|---|
-|**retentionPolicy**  <br>*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
-|**scalingPolicy**  <br>*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
-|**streamName**  <br>*optional*|**Example** : `"string"`|string|
+|**retentionPolicy**  <br />*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
+|**scalingPolicy**  <br />*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
+|**streamName**  <br />*optional*|**Example** : `"string"`|string|
 
 
 #### Responses
@@ -460,8 +460,8 @@ List streams within the given scope
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Query**|**showInternalStreams**  <br>*optional*|Optional flag whether to display system created streams. If not specified only user created streams will be returned|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Query**|**showInternalStreams**  <br />*optional*|Optional flag whether to display system created streams. If not specified only user created streams will be returned|string|
 
 
 #### Responses
@@ -530,8 +530,8 @@ Fetch the properties of an existing stream
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Path**|**streamName**  <br>*required*|Stream name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Path**|**streamName**  <br />*required*|Stream name|string|
 
 
 #### Responses
@@ -598,17 +598,17 @@ Update configuration of an existing stream
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Path**|**streamName**  <br>*required*|Stream name|string|
-|**Body**|**UpdateStreamRequest**  <br>*required*|The new stream configuration|[UpdateStreamRequest](#updatestream-updatestreamrequest)|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Path**|**streamName**  <br />*required*|Stream name|string|
+|**Body**|**UpdateStreamRequest**  <br />*required*|The new stream configuration|[UpdateStreamRequest](#updatestream-updatestreamrequest)|
 
 <a name="updatestream-updatestreamrequest"></a>
 **UpdateStreamRequest**
 
 |Name|Description|Schema|
 |---|---|---|
-|**retentionPolicy**  <br>*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
-|**scalingPolicy**  <br>*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
+|**retentionPolicy**  <br />*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
+|**scalingPolicy**  <br />*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
 
 
 #### Responses
@@ -702,8 +702,8 @@ Delete a stream
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Path**|**streamName**  <br>*required*|Stream name|string|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Path**|**streamName**  <br />*required*|Stream name|string|
 
 
 #### Responses
@@ -740,10 +740,10 @@ Get scaling events for a given datetime period.
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Path**|**streamName**  <br>*required*|Stream name|string|
-|**Query**|**from**  <br>*required*|Parameter to display scaling events from that particular datetime. Input should be milliseconds from Jan 1 1970.|integer (int64)|
-|**Query**|**to**  <br>*required*|Parameter to display scaling events to that particular datetime. Input should be milliseconds from Jan 1 1970.|integer (int64)|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Path**|**streamName**  <br />*required*|Stream name|string|
+|**Query**|**from**  <br />*required*|Parameter to display scaling events from that particular datetime. Input should be milliseconds from Jan 1 1970.|integer (int64)|
+|**Query**|**to**  <br />*required*|Parameter to display scaling events to that particular datetime. Input should be milliseconds from Jan 1 1970.|integer (int64)|
 
 
 #### Responses
@@ -804,9 +804,9 @@ Updates the current state of the stream
 
 |Type|Name|Description|Schema|
 |---|---|---|---|
-|**Path**|**scopeName**  <br>*required*|Scope name|string|
-|**Path**|**streamName**  <br>*required*|Stream name|string|
-|**Body**|**UpdateStreamStateRequest**  <br>*required*|The state info to be updated|[StreamState](#streamstate)|
+|**Path**|**scopeName**  <br />*required*|Scope name|string|
+|**Path**|**streamName**  <br />*required*|Stream name|string|
+|**Body**|**UpdateStreamStateRequest**  <br />*required*|The state info to be updated|[StreamState](#streamstate)|
 
 
 #### Responses
@@ -869,10 +869,10 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**onlineReaderIds**  <br>*optional*|**Example** : `[ "string" ]`|< string > array|
-|**readerGroupName**  <br>*optional*|**Example** : `"string"`|string|
-|**scopeName**  <br>*optional*|**Example** : `"string"`|string|
-|**streamList**  <br>*optional*|**Example** : `[ "string" ]`|< string > array|
+|**onlineReaderIds**  <br />*optional*|**Example** : `[ "string" ]`|< string > array|
+|**readerGroupName**  <br />*optional*|**Example** : `"string"`|string|
+|**scopeName**  <br />*optional*|**Example** : `"string"`|string|
+|**streamList**  <br />*optional*|**Example** : `[ "string" ]`|< string > array|
 
 
 <a name="readergroupslist"></a>
@@ -880,14 +880,14 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**readerGroups**  <br>*optional*|**Example** : `[ "object" ]`|< [readerGroups](#readergroupslist-readergroups) > array|
+|**readerGroups**  <br />*optional*|**Example** : `[ "object" ]`|< [readerGroups](#readergroupslist-readergroups) > array|
 
 <a name="readergroupslist-readergroups"></a>
 **readerGroups**
 
 |Name|Description|Schema|
 |---|---|---|
-|**readerGroupName**  <br>*optional*|**Example** : `"string"`|string|
+|**readerGroupName**  <br />*optional*|**Example** : `"string"`|string|
 
 
 <a name="retentionconfig"></a>
@@ -895,9 +895,9 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**timeBasedRetention**  <br>*optional*|**Example** : `"[timebasedretention](#timebasedretention)"`|[TimeBasedRetention](#timebasedretention)|
-|**type**  <br>*optional*|Indicates if retention is by space or time.  <br>**Example** : `"string"`|enum (LIMITED_DAYS, LIMITED_SIZE_MB)|
-|**value**  <br>*optional*|**Example** : `0`|integer (int64)|
+|**timeBasedRetention**  <br />*optional*|**Example** : `"[timebasedretention](#timebasedretention)"`|[TimeBasedRetention](#timebasedretention)|
+|**type**  <br />*optional*|Indicates if retention is by space or time.  <br />**Example** : `"string"`|enum (LIMITED_DAYS, LIMITED_SIZE_MB)|
+|**value**  <br />*optional*|**Example** : `0`|integer (int64)|
 
 
 <a name="scalemetadata"></a>
@@ -905,10 +905,10 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**merges**  <br>*optional*|**Example** : `0`|integer (int64)|
-|**segmentList**  <br>*optional*|**Example** : `[ "[segment](#segment)" ]`|< [Segment](#segment) > array|
-|**splits**  <br>*optional*|**Example** : `0`|integer (int64)|
-|**timestamp**  <br>*optional*|**Example** : `0`|integer (int64)|
+|**merges**  <br />*optional*|**Example** : `0`|integer (int64)|
+|**segmentList**  <br />*optional*|**Example** : `[ "[segment](#segment)" ]`|< [Segment](#segment) > array|
+|**splits**  <br />*optional*|**Example** : `0`|integer (int64)|
+|**timestamp**  <br />*optional*|**Example** : `0`|integer (int64)|
 
 
 <a name="scalingconfig"></a>
@@ -916,10 +916,10 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**minSegments**  <br>*optional*|**Example** : `0`|integer (int32)|
-|**scaleFactor**  <br>*optional*|**Example** : `0`|integer (int32)|
-|**targetRate**  <br>*optional*|**Example** : `0`|integer (int32)|
-|**type**  <br>*optional*|**Example** : `"string"`|enum (FIXED_NUM_SEGMENTS, BY_RATE_IN_KBYTES_PER_SEC, BY_RATE_IN_EVENTS_PER_SEC)|
+|**minSegments**  <br />*optional*|**Example** : `0`|integer (int32)|
+|**scaleFactor**  <br />*optional*|**Example** : `0`|integer (int32)|
+|**targetRate**  <br />*optional*|**Example** : `0`|integer (int32)|
+|**type**  <br />*optional*|**Example** : `"string"`|enum (FIXED_NUM_SEGMENTS, BY_RATE_IN_KBYTES_PER_SEC, BY_RATE_IN_EVENTS_PER_SEC)|
 
 
 <a name="scalingeventlist"></a>
@@ -927,7 +927,7 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**scalingEvents**  <br>*optional*|**Example** : `[ "[scalemetadata](#scalemetadata)" ]`|< [ScaleMetadata](#scalemetadata) > array|
+|**scalingEvents**  <br />*optional*|**Example** : `[ "[scalemetadata](#scalemetadata)" ]`|< [ScaleMetadata](#scalemetadata) > array|
 
 
 <a name="scopeproperty"></a>
@@ -935,7 +935,7 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**scopeName**  <br>*optional*|**Example** : `"string"`|string|
+|**scopeName**  <br />*optional*|**Example** : `"string"`|string|
 
 
 <a name="scopeslist"></a>
@@ -943,7 +943,7 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**scopes**  <br>*optional*|**Example** : `[ "[scopeproperty](#scopeproperty)" ]`|< [ScopeProperty](#scopeproperty) > array|
+|**scopes**  <br />*optional*|**Example** : `[ "[scopeproperty](#scopeproperty)" ]`|< [ScopeProperty](#scopeproperty) > array|
 
 
 <a name="segment"></a>
@@ -951,10 +951,10 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**keyEnd**  <br>*optional*|**Example** : `0`|integer (double)|
-|**keyStart**  <br>*optional*|**Example** : `0`|integer (double)|
-|**number**  <br>*optional*|**Example** : `0`|integer (int32)|
-|**startTime**  <br>*optional*|**Example** : `0`|integer (int64)|
+|**keyEnd**  <br />*optional*|**Example** : `0`|integer (double)|
+|**keyStart**  <br />*optional*|**Example** : `0`|integer (double)|
+|**number**  <br />*optional*|**Example** : `0`|integer (int32)|
+|**startTime**  <br />*optional*|**Example** : `0`|integer (int64)|
 
 
 <a name="streamproperty"></a>
@@ -962,10 +962,10 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**retentionPolicy**  <br>*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
-|**scalingPolicy**  <br>*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
-|**scopeName**  <br>*optional*|**Example** : `"string"`|string|
-|**streamName**  <br>*optional*|**Example** : `"string"`|string|
+|**retentionPolicy**  <br />*optional*|**Example** : `"[retentionconfig](#retentionconfig)"`|[RetentionConfig](#retentionconfig)|
+|**scalingPolicy**  <br />*optional*|**Example** : `"[scalingconfig](#scalingconfig)"`|[ScalingConfig](#scalingconfig)|
+|**scopeName**  <br />*optional*|**Example** : `"string"`|string|
+|**streamName**  <br />*optional*|**Example** : `"string"`|string|
 
 
 <a name="streamstate"></a>
@@ -973,7 +973,7 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**streamState**  <br>*optional*|**Example** : `"string"`|enum (SEALED)|
+|**streamState**  <br />*optional*|**Example** : `"string"`|enum (SEALED)|
 
 
 <a name="streamslist"></a>
@@ -981,7 +981,7 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**streams**  <br>*optional*|**Example** : `[ "[streamproperty](#streamproperty)" ]`|< [StreamProperty](#streamproperty) > array|
+|**streams**  <br />*optional*|**Example** : `[ "[streamproperty](#streamproperty)" ]`|< [StreamProperty](#streamproperty) > array|
 
 
 <a name="timebasedretention"></a>
@@ -989,9 +989,9 @@ Updates the current state of the stream
 
 |Name|Description|Schema|
 |---|---|---|
-|**days**  <br>*optional*|**Example** : `0`|integer (int64)|
-|**hours**  <br>*optional*|**Example** : `0`|integer (int64)|
-|**minutes**  <br>*optional*|**Example** : `0`|integer (int64)|
+|**days**  <br />*optional*|**Example** : `0`|integer (int64)|
+|**hours**  <br />*optional*|**Example** : `0`|integer (int64)|
+|**minutes**  <br />*optional*|**Example** : `0`|integer (int64)|
 
 
 
