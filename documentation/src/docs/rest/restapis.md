@@ -31,9 +31,11 @@ List of admin REST APIs for the pravega controller service.
 
 
 <a name="paths"></a>
+
 ## Paths
 
 <a name="createscope"></a>
+
 ### POST /scopes
 
 #### Description
@@ -47,6 +49,7 @@ Create a new scope
 |**Body**|**CreateScopeRequest**  <br />*required*|The scope configuration|[CreateScopeRequest](#createscope-createscoperequest)|
 
 <a name="createscope-createscoperequest"></a>
+
 **CreateScopeRequest**
 
 |Name|Description|Schema|
@@ -150,7 +153,8 @@ List all available scopes in pravega
 
 
 <a name="getscope"></a>
-### GET /scopes/{scopeName}
+
+### GET /scopes/&#123;scopeName&#125;
 
 #### Description
 Retrieve details of an existing scope
@@ -201,7 +205,8 @@ Retrieve details of an existing scope
 
 
 <a name="deletescope"></a>
-### DELETE /scopes/{scopeName}
+
+### DELETE /scopes/&#123;scopeName&#125;
 
 #### Description
 Delete a scope
@@ -238,7 +243,8 @@ Delete a scope
 
 
 <a name="listreadergroups"></a>
-### GET /scopes/{scopeName}/readergroups
+
+### GET /scopes/&#123;scopeName&#125;/readergroups
 
 #### Description
 List reader groups within the given scope
@@ -289,7 +295,7 @@ List reader groups within the given scope
 
 
 <a name="getreadergroup"></a>
-### GET /scopes/{scopeName}/readergroups/{readerGroupName}
+### GET /scopes/&#123;scopeName&#125;/readergroups/&#123;readerGroupName&#125;
 
 #### Description
 Fetch the properties of an existing reader group
@@ -344,7 +350,8 @@ Fetch the properties of an existing reader group
 
 
 <a name="createstream"></a>
-### POST /scopes/{scopeName}/streams
+
+### POST /scopes/&#123;scopeName&#125;/streams
 
 #### Description
 Create a new stream
@@ -358,6 +365,7 @@ Create a new stream
 |**Body**|**CreateStreamRequest**  <br />*required*|The stream configuration|[CreateStreamRequest](#createstream-createstreamrequest)|
 
 <a name="createstream-createstreamrequest"></a>
+
 **CreateStreamRequest**
 
 |Name|Description|Schema|
@@ -450,7 +458,8 @@ Create a new stream
 
 
 <a name="liststreams"></a>
-### GET /scopes/{scopeName}/streams
+
+### GET /scopes/&#123;scopeName&#125;/streams
 
 #### Description
 List streams within the given scope
@@ -520,7 +529,8 @@ List streams within the given scope
 
 
 <a name="getstream"></a>
-### GET /scopes/{scopeName}/streams/{streamName}
+
+### GET /scopes/&#123;scopeName&#125;/streams/&#123;streamName&#125;
 
 #### Description
 Fetch the properties of an existing stream
@@ -588,7 +598,8 @@ Fetch the properties of an existing stream
 
 
 <a name="updatestream"></a>
-### PUT /scopes/{scopeName}/streams/{streamName}
+
+### PUT /scopes/&#123;scopeName&#125;/streams/&#123;streamName&#125;
 
 #### Description
 Update configuration of an existing stream
@@ -603,6 +614,7 @@ Update configuration of an existing stream
 |**Body**|**UpdateStreamRequest**  <br />*required*|The new stream configuration|[UpdateStreamRequest](#updatestream-updatestreamrequest)|
 
 <a name="updatestream-updatestreamrequest"></a>
+
 **UpdateStreamRequest**
 
 |Name|Description|Schema|
@@ -692,7 +704,8 @@ Update configuration of an existing stream
 
 
 <a name="deletestream"></a>
-### DELETE /scopes/{scopeName}/streams/{streamName}
+
+### DELETE /scopes/&#123;scopeName&#125;/streams/&#123;streamName&#125;
 
 #### Description
 Delete a stream
@@ -730,7 +743,8 @@ Delete a stream
 
 
 <a name="getscalingevents"></a>
-### GET /scopes/{scopeName}/streams/{streamName}/scaling-events
+
+### GET /scopes/&#123;scopeName&#125;/streams/&#123;streamName&#125;/scaling-events
 
 #### Description
 Get scaling events for a given datetime period.
@@ -794,7 +808,8 @@ Get scaling events for a given datetime period.
 
 
 <a name="updatestreamstate"></a>
-### PUT /scopes/{scopeName}/streams/{streamName}/state
+
+### PUT /scopes/&#123;scopeName&#125;/streams/&#123;streamName&#125;/state
 
 #### Description
 Updates the current state of the stream
@@ -862,9 +877,11 @@ Updates the current state of the stream
 
 
 <a name="definitions"></a>
+
 ## Definitions
 
 <a name="readergroupproperty"></a>
+
 ### ReaderGroupProperty
 
 |Name|Description|Schema|
@@ -876,6 +893,7 @@ Updates the current state of the stream
 
 
 <a name="readergroupslist"></a>
+
 ### ReaderGroupsList
 
 |Name|Description|Schema|
@@ -883,6 +901,7 @@ Updates the current state of the stream
 |**readerGroups**  <br />*optional*|**Example** : `[ "object" ]`|< [readerGroups](#readergroupslist-readergroups) > array|
 
 <a name="readergroupslist-readergroups"></a>
+
 **readerGroups**
 
 |Name|Description|Schema|
@@ -891,6 +910,7 @@ Updates the current state of the stream
 
 
 <a name="retentionconfig"></a>
+
 ### RetentionConfig
 
 |Name|Description|Schema|
@@ -901,6 +921,7 @@ Updates the current state of the stream
 
 
 <a name="scalemetadata"></a>
+
 ### ScaleMetadata
 
 |Name|Description|Schema|
@@ -912,6 +933,7 @@ Updates the current state of the stream
 
 
 <a name="scalingconfig"></a>
+
 ### ScalingConfig
 
 |Name|Description|Schema|
@@ -923,6 +945,7 @@ Updates the current state of the stream
 
 
 <a name="scalingeventlist"></a>
+
 ### ScalingEventList
 
 |Name|Description|Schema|
@@ -931,6 +954,7 @@ Updates the current state of the stream
 
 
 <a name="scopeproperty"></a>
+
 ### ScopeProperty
 
 |Name|Description|Schema|
@@ -939,6 +963,7 @@ Updates the current state of the stream
 
 
 <a name="scopeslist"></a>
+
 ### ScopesList
 
 |Name|Description|Schema|
@@ -947,6 +972,7 @@ Updates the current state of the stream
 
 
 <a name="segment"></a>
+
 ### Segment
 
 |Name|Description|Schema|
@@ -958,6 +984,7 @@ Updates the current state of the stream
 
 
 <a name="streamproperty"></a>
+
 ### StreamProperty
 
 |Name|Description|Schema|
@@ -969,6 +996,7 @@ Updates the current state of the stream
 
 
 <a name="streamstate"></a>
+
 ### StreamState
 
 |Name|Description|Schema|
@@ -977,6 +1005,7 @@ Updates the current state of the stream
 
 
 <a name="streamslist"></a>
+
 ### StreamsList
 
 |Name|Description|Schema|
@@ -985,6 +1014,7 @@ Updates the current state of the stream
 
 
 <a name="timebasedretention"></a>
+
 ### TimeBasedRetention
 
 |Name|Description|Schema|
