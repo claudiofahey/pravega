@@ -1,3 +1,7 @@
+---
+title: Implementation of Pravega Authentication/Authorization Plugin
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Implementation of Pravega Authentication/Authorization Plugin
 
 This guide describes in detail the Authentication/Authorization plugin model for Pravega.
 

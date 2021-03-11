@@ -1,3 +1,7 @@
+---
+title: Pravega Metrics
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,8 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-
-# Pravega Metrics
 
 * [Metrics Interfaces and Examples Usage](#metrics-interfaces-and-examples-usage)
    - [Metrics Service Provider — Interface StatsProvider](#metrics-service-provider--interface-statsprovider)

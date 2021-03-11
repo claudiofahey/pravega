@@ -1,3 +1,7 @@
+---
+title: Pravega Key Features
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Pravega Key Features
 
 This document explains some of the key features of Pravega.  It may be
 advantageous if you are already familiar with the core [Pravega Concepts](pravega-concepts.md).

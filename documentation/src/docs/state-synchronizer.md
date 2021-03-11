@@ -1,3 +1,7 @@
+---
+title: State Synchronizer
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Working with Pravega: State Synchronizer
 
 You can think about Pravega as a streaming storage primitive, because it is a
 great way to durably persist data.  You can think about Pravega as a great

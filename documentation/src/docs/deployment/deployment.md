@@ -1,3 +1,7 @@
+---
+title: Pravega Deployment Overview
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Pravega Deployment Overview
 
 This guide describes the options for running Pravega for development, testing and in production.
 

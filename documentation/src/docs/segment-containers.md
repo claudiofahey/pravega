@@ -1,3 +1,7 @@
+---
+title: Segment Containers in a Pravega Cluster
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Segment Containers in a Pravega Cluster
 
 This document describes the high level design of how we are managing the lifecyle of **Segment Containers** in a Pravega Cluster.
 

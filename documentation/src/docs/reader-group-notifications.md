@@ -1,3 +1,7 @@
+---
+title: ReaderGroup Notifications
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Working with Pravega: ReaderGroup Notifications
 
 The ReaderGroup api supports different types of notifications. Currently, we
 have two types implemented, but we plan to add more over time.

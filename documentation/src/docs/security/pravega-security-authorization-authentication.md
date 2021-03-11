@@ -1,3 +1,7 @@
+---
+title: TLS, Authorization, Authentication - Enabling encryption, authorization and authentication features
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# TLS, Authorization, Authentication - Enabling encryption, authorization and authentication features
+
 Pravega ingests application data, which is often sensitive and requires security mechanisms to avoid unauthorized access. To prevent such unauthorized accesses in shared environments, we have enabled mechanisms in Pravega that secure Stream data stored in a Pravega cluster. The security documentation covers aspects of our mechanisms and provides configuration details to enable security in Pravega.
 
 Key features of security implementation:

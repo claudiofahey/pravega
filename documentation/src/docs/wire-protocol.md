@@ -1,3 +1,7 @@
+---
+title: Pravega Streaming Service Wire Protocol
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Pravega Streaming Service Wire Protocol
 
 This page describes the proposed Wire Protocol for the Streaming Service. See [Pravega Concepts](https://pravega.io/docs/latest/pravega-concepts) for more information.
 

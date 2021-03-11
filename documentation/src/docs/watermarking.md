@@ -1,3 +1,7 @@
+---
+title: Watermarking
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Watermarking
 
 Stream-processing applications may require a time-bounded set of metrics to make a calculation, make a decision, or
 commit a transaction. Pravega watermarking provides a way for applications to define time and know with some certainty

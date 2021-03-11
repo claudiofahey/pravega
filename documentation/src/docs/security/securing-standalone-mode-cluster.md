@@ -1,3 +1,7 @@
+---
+title: Setting Up Security for a Standalone Mode Server
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,8 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-
-# Setting Up Security for a Standalone Mode Server
 
 Security in Pravega is off by default. You may start Pravega Standalone mode server with security enabled by modifying the security configuration before launching it.
 

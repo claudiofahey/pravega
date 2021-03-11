@@ -1,3 +1,7 @@
+---
+title: Manual Installation
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Manual Installation
 
 This page describes the prerequisites and installation steps to deploy Pravega in a multi-node production environment.
 

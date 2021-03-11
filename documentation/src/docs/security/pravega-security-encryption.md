@@ -1,3 +1,7 @@
+---
+title: Pravega Encryption
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Pravega Encryption
 
 ## Encryption of data in flight
 Pravega ensures that all the data in flight can be passed by applying encryption.

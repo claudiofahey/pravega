@@ -1,3 +1,7 @@
+---
+title: Frequently Asked Questions
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Frequently Asked Questions
 
 **What is Pravega?**
 Pravega is an open source storage primitive implementing **Streams** for continuous and unbounded data.  See [here](terminology.md) for more definitions of terms related to Pravega.

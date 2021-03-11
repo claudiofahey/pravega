@@ -1,3 +1,7 @@
+---
+title: Java API Reference
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Java API Reference
 
 ### **Clients**
 A Writer is a client that creates Events and publishes them into Streams.

@@ -1,3 +1,7 @@
+---
+title: Running Pravega in Local Machine
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Running Pravega in Local Machine
 
 As an alternative to running Pravega on a cluster of machines, you may run Pravega on a local/single machine. Running Pravega locally on a single host allows you to get started with Pravega quickly. Running Pravega locally is especially suitable for development and testing purposes.
 

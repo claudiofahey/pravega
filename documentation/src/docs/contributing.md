@@ -1,3 +1,7 @@
+---
+title: Contributing to Pravega
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Contributing to Pravega
 
 * [Contributions guidelines](https://github.com/pravega/pravega/wiki/Contributing)
 * [Issue triaging and labeling](https://github.com/pravega/pravega/wiki/Issues-Triaging-and-Labeling)

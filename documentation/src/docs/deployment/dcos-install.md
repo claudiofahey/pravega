@@ -1,3 +1,7 @@
+---
+title: Deploying on DC/OS
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Deploying on DC/OS
 
 Prerequisities: DC/OS cli needs to be installed. To install the cli, follow the instructions here: https://docs.mesosphere.com/1.8/usage/cli/install/
 

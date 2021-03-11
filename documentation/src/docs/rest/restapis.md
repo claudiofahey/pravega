@@ -1,5 +1,6 @@
-# Pravega Controller APIs
-
+---
+title: Pravega Controller APIs
+---
 
 <a name="overview"></a>
 ## Overview

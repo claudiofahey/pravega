@@ -1,3 +1,7 @@
+---
+title: Creating TLS Certificates, Keys and Other TLS Artifacts
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Creating TLS Certificates, Keys and Other TLS Artifacts
 
 This document describes how to create TLS certificates, keys and other artifacts for the server components. The 
 generated CA certificate and Java truststore may also be used on client-side for validating the servers' certificates.

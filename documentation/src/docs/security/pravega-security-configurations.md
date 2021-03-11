@@ -1,3 +1,7 @@
+---
+title: Pravega Security Configurations
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,6 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Pravega Security Configurations
 
 This document describes the security configuration parameters of Pravega, in both **distributed** and **standalone** modes.
 

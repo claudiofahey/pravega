@@ -1,3 +1,7 @@
+---
+title: Client Auth Interface
+---
+
 <!--
 Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
 
@@ -7,7 +11,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 -->
-# Client _auth_ Interface
+
 Pravega client can access Pravega APIs through `grpc`. Some of the admin APIs can be accessed via `REST` API. 
 The Authorization/Authentication API and plugin works for both of these interfaces.
 
