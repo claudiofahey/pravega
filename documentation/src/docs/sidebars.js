@@ -17,6 +17,7 @@ module.exports = {
                 'watermarking',
             ],
             'Developing Pravega Applications': [
+                'pravega-write-read-methods',
                 'javadoc',
                 'rest/restapis',
                 'connectors',
