@@ -13,8 +13,8 @@ Method                                                                          
 [Pravega Sensor Collector](#pravega-sensor-collector)                                 | Yes   | Yes                 | No   | EO               |
 [SDP Ingest Gateway](#sdp-ingest-gateway)                                             | Yes   | No                  | No   |                  |
 [Pravega Search](#pravega-search)                                                     | Yes   | Yes                 | Yes  | EO               |
-[Apache Flink](../flink-connectors/index.md)                                          | Yes   | Yes                 | Yes  | EO               |
-[Apache Spark](../spark-connectors/index.md)                                          | Yes   | Yes                 | Yes  | EO               |
+[Apache Flink](../flink-connectors/overview.md)                                          | Yes   | Yes                 | Yes  | EO               |
+[Apache Spark](../spark-connectors/overview.md)                                          | Yes   | Yes                 | Yes  | EO               |
 [Apache NiFi](https://github.com/pravega/nifi-pravega)                                | Yes   | No                  | Yes  |                  |
 [Logstash](https://github.com/pravega?q=logstash)                                     | Yes   | No                  | Yes  |                  |
 [Apache Hadoop](https://github.com/pravega/hadoop-connectors)                         | Yes   | No                  | Yes  |                  |
