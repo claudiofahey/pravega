@@ -41,6 +41,7 @@ module.exports = {
                 'security/pravega-security-authorization-authentication',
                 'security/pravega-security-configurations',
                 'security/pravega-security-encryption',
+                'security/securing-standalone-mode-cluster',
                 'security/securing-distributed-mode-cluster',
             ],
             'Contributing to Pravega': [
