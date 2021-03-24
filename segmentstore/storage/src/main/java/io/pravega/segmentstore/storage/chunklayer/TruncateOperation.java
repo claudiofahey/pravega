@@ -1,11 +1,17 @@
 /**
- * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ * Copyright Pravega Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.pravega.segmentstore.storage.chunklayer;
 
@@ -85,7 +91,8 @@ class TruncateOperation implements Callable<CompletableFuture<Void>> {
                                                 txn.update(segmentMetadata);
 
                                                 // Check invariants.
-                                                Preconditions.checkState(segmentMetadata.getLength() == oldLength, "truncate should not change segment length");
+                                                Preconditions.checkState(segmentMetadata.getLength() == oldLength,
+                                                        "truncate should not change segment length. oldLength=%s Segment=%s", oldLength, segmentMetadata);
                                                 segmentMetadata.checkInvariants();
 
                                                 // Remove read index block entries.
@@ -165,7 +172,7 @@ class TruncateOperation implements Callable<CompletableFuture<Void>> {
                 () -> txn.get(currentChunkName)
                         .thenAcceptAsync(storageMetadata -> {
                             currentMetadata = (ChunkMetadata) storageMetadata;
-                            Preconditions.checkState(null != currentMetadata, "currentMetadata is null.");
+                            Preconditions.checkState(null != currentMetadata, "currentMetadata is null. Segment=%s currentChunkName=%s", segmentMetadata, currentChunkName);
 
                             // If for given chunk start <= offset < end  then we have found the chunk that will be the first chunk.
                             if ((startOffset.get() <= offset) && (startOffset.get() + currentMetadata.getLength() > offset)) {
@@ -218,8 +225,7 @@ class TruncateOperation implements Callable<CompletableFuture<Void>> {
     }
 
     private void checkPreconditions() {
-        Preconditions.checkArgument(null != handle, "handle");
-        Preconditions.checkArgument(!handle.isReadOnly(), "handle");
-        Preconditions.checkArgument(offset >= 0, "offset");
+        Preconditions.checkArgument(!handle.isReadOnly(), "handle must not be read only. Segment = %s", handle.getSegmentName());
+        Preconditions.checkArgument(offset >= 0, "offset must be non-negative. Segment = %s offset = %s", handle.getSegmentName(), offset);
     }
 }

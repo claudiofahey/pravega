@@ -3,13 +3,19 @@ title: State Synchronizer Design
 ---
 
 <!--
-Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+Copyright Pravega Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 -->
 
 In a State Synchronizer data can be written and read by multiple processes, and the consistency is guaranteed using optimistic checks. State Synchronizer provides the abstraction of a user defined `Java Object` which is kept in-sync consistently across the multiple machines. All the hosts would see the same object even as it is modified.
